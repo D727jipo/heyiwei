@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +54,13 @@ public class MainActivity extends Activity {
     private static final int SHOW_MAX_CHARS = 4000;
     private static final int PREVIEW_CHARS = 2000;
 
+    /** 背景颜色偏好: 0=跟随系统, 1=白色(浅色), 2=深色 */
+    private static final int THEME_FOLLOW = 0;
+    private static final int THEME_LIGHT = 1;
+    private static final int THEME_DARK = 2;
+
+    private static final String PREFS = "MainActivity";
+
     private EditText input;
     private TextView result;
     private TextView note;
@@ -62,6 +71,7 @@ public class MainActivity extends Activity {
 
     private Limits limits = new Limits();
     private String fullResult = "";
+    private int themeMode = THEME_FOLLOW;
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Handler ui = new Handler(Looper.getMainLooper());
@@ -70,6 +80,26 @@ public class MainActivity extends Activity {
     private Runnable pendingEval;
     private volatile boolean computing = false;
     private volatile int lastPercent = -1;
+
+    /**
+     * 背景颜色: 跟随系统时不做任何覆盖; 手动选白色/深色时只给本 Activity 套一份
+     * 覆盖了 uiMode 的 Configuration(平台自带能力, 不需要 AppCompat)。
+     * 这样 values-night / values-v31 等资源都会按所选模式重新解析。
+     */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        int mode = newBase.getSharedPreferences(PREFS, MODE_PRIVATE)
+                .getInt("themeMode", THEME_FOLLOW);
+        if (mode != THEME_LIGHT && mode != THEME_DARK) {
+            super.attachBaseContext(newBase);
+            return;
+        }
+        Configuration cfg = new Configuration(newBase.getResources().getConfiguration());
+        int night = (mode == THEME_DARK)
+                ? Configuration.UI_MODE_NIGHT_YES : Configuration.UI_MODE_NIGHT_NO;
+        cfg.uiMode = (cfg.uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | night;
+        super.attachBaseContext(newBase.createConfigurationContext(cfg));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -385,18 +415,35 @@ public class MainActivity extends Activity {
     // ======================= 设置 =======================
 
     private void loadPrefs() {
-        SharedPreferences sp = getPreferences(MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
         limits.precision = sp.getInt("precision", 50);
         limits.maxDigits = sp.getInt("maxDigits", 1000000);
         limits.force = sp.getBoolean("force", false);
+        themeMode = sp.getInt("themeMode", THEME_FOLLOW);
     }
 
     private void savePrefs() {
-        SharedPreferences.Editor e = getPreferences(MODE_PRIVATE).edit();
+        SharedPreferences.Editor e = getSharedPreferences(PREFS, MODE_PRIVATE).edit();
         e.putInt("precision", limits.precision);
         e.putInt("maxDigits", limits.maxDigits);
         e.putBoolean("force", limits.force);
+        e.putInt("themeMode", themeMode);
         e.apply();
+    }
+
+    /** 只有"手动选择"时才允许选白色/深色 */
+    private void updateThemeColorEnabled(RadioGroup mode, View[] colorViews) {
+        boolean manual = mode.getCheckedRadioButtonId() == R.id.setThemeManual;
+        for (View v : colorViews) {
+            v.setEnabled(manual);
+            v.setAlpha(manual ? 1f : 0.4f);
+        }
+    }
+
+    private String themeName(int mode) {
+        if (mode == THEME_LIGHT) return getString(R.string.theme_white);
+        if (mode == THEME_DARK) return getString(R.string.theme_dark);
+        return getString(R.string.theme_follow);
     }
 
     private void showSettings() {
@@ -404,9 +451,24 @@ public class MainActivity extends Activity {
         final EditText pPrec = (EditText) view.findViewById(R.id.setPrecision);
         final EditText pMax = (EditText) view.findViewById(R.id.setMaxDigits);
         final CheckBox pForce = (CheckBox) view.findViewById(R.id.setForce);
+        final RadioGroup thMode = (RadioGroup) view.findViewById(R.id.setThemeMode);
+        final RadioGroup thColor = (RadioGroup) view.findViewById(R.id.setThemeColor);
+        final View thLabel = view.findViewById(R.id.setThemeColorLabel);
+
         pPrec.setText(String.valueOf(limits.precision));
         pMax.setText(String.valueOf(limits.maxDigits));
         pForce.setChecked(limits.force);
+
+        thMode.check(themeMode == THEME_FOLLOW ? R.id.setThemeSystem : R.id.setThemeManual);
+        thColor.check(themeMode == THEME_DARK ? R.id.setThemeDark : R.id.setThemeWhite);
+        final View[] colorViews = {thColor, thLabel};
+        updateThemeColorEnabled(thMode, colorViews);
+        thMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup g, int checkedId) {
+                updateThemeColorEnabled(g, colorViews);
+            }
+        });
 
         new AlertDialog.Builder(this)
                 .setTitle(R.string.menu_settings)
@@ -425,8 +487,25 @@ public class MainActivity extends Activity {
                         } catch (Exception ignored) {
                         }
                         limits.force = pForce.isChecked();
+
+                        int newTheme;
+                        if (thMode.getCheckedRadioButtonId() == R.id.setThemeSystem) {
+                            newTheme = THEME_FOLLOW;
+                        } else {
+                            newTheme = (thColor.getCheckedRadioButtonId() == R.id.setThemeDark)
+                                    ? THEME_DARK : THEME_LIGHT;
+                        }
+                        boolean themeChanged = (newTheme != themeMode);
+                        themeMode = newTheme;
                         savePrefs();
-                        if (liveBox.isChecked()) startEval(input.getText().toString(), false);
+                        if (themeChanged) {
+                            Toast.makeText(MainActivity.this,
+                                    getString(R.string.theme_toast, themeName(newTheme)),
+                                    Toast.LENGTH_SHORT).show();
+                            recreate();  // 重新套用配置(背景/配色/主题)
+                        } else if (liveBox.isChecked()) {
+                            startEval(input.getText().toString(), false);
+                        }
                     }
                 })
                 .setNegativeButton("取消", null)

@@ -46,4 +46,72 @@
         android:layout_marginTop="10dp"
         android:text="@string/set_force"
         android:textColor="@color/md_on_surface" />
+
+    <!-- 背景颜色(与上面两项独立) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/md_outline" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/set_theme"
+        android:textColor="@color/md_on_surface"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/setThemeMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/setThemeSystem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_follow"
+            android:textColor="@color/md_on_surface" />
+
+        <RadioButton
+            android:id="@+id/setThemeManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_manual"
+            android:textColor="@color/md_on_surface" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/setThemeColorLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/set_theme_color"
+        android:textColor="@color/md_on_surface_variant"
+        android:textSize="13sp" />
+
+    <RadioGroup
+        android:id="@+id/setThemeColor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/setThemeWhite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:text="@string/theme_white"
+            android:textColor="@color/md_on_surface" />
+
+        <RadioButton
+            android:id="@+id/setThemeDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_dark"
+            android:textColor="@color/md_on_surface" />
+    </RadioGroup>
 </LinearLayout>

@@ -15,6 +15,13 @@
     <string name="set_precision">近似结果有效数字位数 (1~20000, 默认 50)</string>
     <string name="set_maxdigits">结果位数安全上限 (默认 1000000)</string>
     <string name="set_force">解除位数上限(可能很慢/很占内存)</string>
+    <string name="set_theme">背景颜色</string>
+    <string name="set_theme_color">手动选择配色</string>
+    <string name="theme_follow">跟随系统</string>
+    <string name="theme_manual">手动选择</string>
+    <string name="theme_white">白色</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_toast">已切换为%s</string>
     <string name="about_text">大数计算器 Android 12 版\n\n界面使用 Android 12 自带框架: Material You 动态取色、DayNight 深色模式、系统 SplashScreen、原生圆角/水波纹控件; 不含任何第三方库。\n\n大数运算由平台 java.math.BigInteger 实现, 语义与桌面版 calc.exe 一致。</string>
     <string name="help">支持 + − × ÷ ^(次方) √(开平方) 和括号; 函数 sqrt(x)、pow(a,b); 常量 pi、e。\n次方不限大小(如 2^1000000 精确输出); 除数为 0 会提示"除数不能等于0"; 除不尽/开不尽按上面的有效位数取近似。</string>
 </resources>
