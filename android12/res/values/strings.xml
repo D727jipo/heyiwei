@@ -22,6 +22,16 @@
     <string name="theme_white">白色</string>
     <string name="theme_dark">深色</string>
     <string name="theme_toast">已切换为%s</string>
+    <string name="full_result_title">完整结果</string>
+    <string name="full_result_close">关闭</string>
+    <string name="view_all">查看全部数字</string>
+    <string name="fr_first">首页</string>
+    <string name="fr_prev">上一页</string>
+    <string name="fr_next">下一页</string>
+    <string name="fr_last">末页</string>
+    <string name="fr_copy_page">复制本页</string>
+    <string name="fr_copy_all">复制全部</string>
+    <string name="fr_export">导出到文件</string>
     <string name="about_text">大数计算器 Android 12 版\n\n界面使用 Android 12 自带框架: Material You 动态取色、DayNight 深色模式、系统 SplashScreen、原生圆角/水波纹控件; 不含任何第三方库。\n\n大数运算由平台 java.math.BigInteger 实现, 语义与桌面版 calc.exe 一致。</string>
     <string name="help">支持 + − × ÷ ^(次方) √(开平方) 和括号; 函数 sqrt(x)、pow(a,b); 常量 pi、e。\n次方不限大小(如 2^1000000 精确输出); 除数为 0 会提示"除数不能等于0"; 除不尽/开不尽按上面的有效位数取近似。</string>
 </resources>

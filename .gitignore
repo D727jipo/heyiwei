@@ -8,3 +8,6 @@ __pycache__/
 
 # 临时工作目录
 _gitwork/
+
+# 源码的单独备份(按需求本地留一份, 不提交)
+source-backup/

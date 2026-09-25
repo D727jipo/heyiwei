@@ -2,12 +2,15 @@ package com.dsh.calc12;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +19,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -32,6 +36,9 @@ import com.dsh.calc.Calc;
 import com.dsh.calc.CalcException;
 import com.dsh.calc.Limits;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -53,6 +60,12 @@ public class MainActivity extends Activity {
 
     private static final int SHOW_MAX_CHARS = 4000;
     private static final int PREVIEW_CHARS = 2000;
+    /** 完整结果查看器每页字符数 */
+    private static final int PAGE_CHARS = 50000;
+    /** 剪贴板承载能力有限, 超过这个长度就建议改用"导出到文件" */
+    private static final int CLIPBOARD_WARN = 100000;
+
+    private static final int REQ_EXPORT = 1001;
 
     /** 背景颜色偏好: 0=跟随系统, 1=白色(浅色), 2=深色 */
     private static final int THEME_FOLLOW = 0;
@@ -67,10 +80,12 @@ public class MainActivity extends Activity {
     private TextView progressText;
     private ProgressBar progressBar;
     private CheckBox liveBox;
+    private Button viewAll;
     private View root;
 
     private Limits limits = new Limits();
     private String fullResult = "";
+    private boolean resultTruncated = false;
     private int themeMode = THEME_FOLLOW;
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
@@ -113,6 +128,13 @@ public class MainActivity extends Activity {
         progressText = (TextView) findViewById(R.id.progressText);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         liveBox = (CheckBox) findViewById(R.id.live);
+        viewAll = (Button) findViewById(R.id.viewAll);
+        viewAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFullResult();
+            }
+        });
 
         applyEdgeToEdge();
         loadPrefs();
@@ -262,22 +284,195 @@ public class MainActivity extends Activity {
 
     private void clearResult() {
         fullResult = "";
+        resultTruncated = false;
         result.setText("");
         note.setText("");
+        if (viewAll != null) viewAll.setVisibility(View.GONE);
         hideProgress();
     }
 
+    /** 复制全部数字(结果框里显示的可能是省略版, 这里复制的始终是完整值) */
     private void copyResult() {
         if (fullResult == null || fullResult.length() == 0) {
             Toast.makeText(this, "还没有结果", Toast.LENGTH_SHORT).show();
             return;
         }
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (cm != null) {
+        if (cm == null) return;
+        try {
             cm.setPrimaryClip(ClipData.newPlainText("计算结果", fullResult));
-            Toast.makeText(this, "已复制 " + fullResult.length() + " 个字符", Toast.LENGTH_SHORT).show();
+            String msg = "已复制全部 " + fullResult.length() + " 个字符";
+            if (fullResult.length() > CLIPBOARD_WARN)
+                msg += "\n(文本很长, 若粘贴出来不完整请用「导出到文件」)";
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        } catch (Throwable t) {
+            Toast.makeText(this, "剪贴板放不下这么长的文本(" + fullResult.length()
+                    + " 字符), 请用「" + getString(R.string.fr_export) + "」", Toast.LENGTH_LONG).show();
         }
     }
+
+    /** 导出完整结果到用户选择的文件(超出剪贴板上限也能完整保存) */
+    private void exportResult() {
+        if (fullResult == null || fullResult.length() == 0) {
+            Toast.makeText(this, "还没有结果", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TITLE, "计算结果-" + fullResult.length() + "位.txt");
+        try {
+            startActivityForResult(intent, REQ_EXPORT);
+        } catch (Throwable t) {
+            Toast.makeText(this, "无法打开文件保存对话框: " + t, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQ_EXPORT || resultCode != RESULT_OK
+                || data == null || data.getData() == null) return;
+        final Uri uri = data.getData();
+        final String text = fullResult;
+        Toast.makeText(this, "正在导出 " + text.length() + " 个字符…", Toast.LENGTH_SHORT).show();
+        worker.execute(new Runnable() {
+            @Override
+            public void run() {
+                String err = null;
+                try {
+                    OutputStream os = getContentResolver().openOutputStream(uri, "wt");
+                    if (os == null) throw new IllegalStateException("无法写入所选文件");
+                    Writer w = new OutputStreamWriter(os, "UTF-8");
+                    w.write(text);
+                    w.flush();
+                    w.close();
+                } catch (Throwable t) {
+                    err = String.valueOf(t);
+                }
+                final String e = err;
+                ui.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (e == null)
+                            Toast.makeText(MainActivity.this,
+                                    "已导出 " + text.length() + " 个字符", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(MainActivity.this, "导出失败: " + e, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
+
+    // ======================= 完整结果查看器 =======================
+
+    /** 分页浏览完整数字: 结果再长也能一页页看完, 不再只有省略号 */
+    private void showFullResult() {
+        if (fullResult == null || fullResult.length() == 0) {
+            Toast.makeText(this, "还没有结果", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_full_result);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        final TextView info = (TextView) dialog.findViewById(R.id.frInfo);
+        final TextView text = (TextView) dialog.findViewById(R.id.frText);
+        final Button first = (Button) dialog.findViewById(R.id.frFirst);
+        final Button prev = (Button) dialog.findViewById(R.id.frPrev);
+        final Button next = (Button) dialog.findViewById(R.id.frNext);
+        final Button last = (Button) dialog.findViewById(R.id.frLast);
+        final Button copyPage = (Button) dialog.findViewById(R.id.frCopyPage);
+        final int pages = (fullResult.length() + PAGE_CHARS - 1) / PAGE_CHARS;
+        final int[] page = {0};
+
+        final Runnable render = new Runnable() {
+            @Override
+            public void run() {
+                int from = page[0] * PAGE_CHARS;
+                int to = Math.min(fullResult.length(), from + PAGE_CHARS);
+                text.setText(fullResult.substring(from, to));
+                info.setText("共 " + fullResult.length() + " 个字符 · 第 " + (page[0] + 1)
+                        + " / " + pages + " 页 (每页 " + PAGE_CHARS + " 字符)");
+                first.setEnabled(page[0] > 0);
+                prev.setEnabled(page[0] > 0);
+                next.setEnabled(page[0] < pages - 1);
+                last.setEnabled(page[0] < pages - 1);
+                first.setAlpha(page[0] > 0 ? 1f : 0.4f);
+                prev.setAlpha(page[0] > 0 ? 1f : 0.4f);
+                next.setAlpha(page[0] < pages - 1 ? 1f : 0.4f);
+                last.setAlpha(page[0] < pages - 1 ? 1f : 0.4f);
+            }
+        };
+        render.run();
+
+        first.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                page[0] = 0;
+                render.run();
+            }
+        });
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (page[0] > 0) --page[0];
+                render.run();
+            }
+        });
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (page[0] < pages - 1) ++page[0];
+                render.run();
+            }
+        });
+        last.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                page[0] = pages - 1;
+                render.run();
+            }
+        });
+        copyPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int from = page[0] * PAGE_CHARS;
+                int to = Math.min(fullResult.length(), from + PAGE_CHARS);
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (cm != null) {
+                    cm.setPrimaryClip(ClipData.newPlainText("计算结果",
+                            fullResult.substring(from, to)));
+                    Toast.makeText(MainActivity.this,
+                            "已复制本页 " + (to - from) + " 个字符", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        ((Button) dialog.findViewById(R.id.frCopyAll)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                copyResult();
+            }
+        });
+        ((Button) dialog.findViewById(R.id.frExport)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exportResult();
+            }
+        });
+        ((Button) dialog.findViewById(R.id.frClose)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
 
     // ======================= 原生 PopupMenu(现代化菜单) =======================
 
@@ -285,7 +480,9 @@ public class MainActivity extends Activity {
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.getMenu().add(0, 1, 0, R.string.menu_settings);
         menu.getMenu().add(0, 2, 1, R.string.menu_copy);
-        menu.getMenu().add(0, 3, 2, R.string.menu_about);
+        menu.getMenu().add(0, 4, 2, R.string.view_all);
+        menu.getMenu().add(0, 5, 3, R.string.fr_export);
+        menu.getMenu().add(0, 3, 4, R.string.menu_about);
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -295,6 +492,12 @@ public class MainActivity extends Activity {
                         return true;
                     case 2:
                         copyResult();
+                        return true;
+                    case 4:
+                        showFullResult();
+                        return true;
+                    case 5:
+                        exportResult();
                         return true;
                     default:
                         new AlertDialog.Builder(MainActivity.this)
@@ -364,6 +567,8 @@ public class MainActivity extends Activity {
             hideProgress();
             result.setText("");
             fullResult = "";
+            resultTruncated = false;
+            viewAll.setVisibility(View.GONE);
             String hint = err.contains("超过安全上限") ? "\n(可在菜单→计算设置里勾选\"解除位数上限\")" : "";
             note.setText("错误: " + err + hint);
             note.setTextColor(getResources().getColor(R.color.md_error));
@@ -375,16 +580,34 @@ public class MainActivity extends Activity {
         }
         String s = v.toString();
         fullResult = s;
-        if (s.length() <= SHOW_MAX_CHARS) {
+        resultTruncated = s.length() > SHOW_MAX_CHARS;
+        if (!resultTruncated) {
             result.setText(s);
+            result.setTextIsSelectable(true);
+            result.setOnClickListener(null);
+            viewAll.setVisibility(View.GONE);
         } else {
+            // 结果框里只放头尾预览(几十万位全塞进 TextView 会卡), 完整数字用「查看全部数字」看
             result.setText(s.substring(0, PREVIEW_CHARS)
-                    + "\n… …(此处省略 " + (s.length() - PREVIEW_CHARS) + " 个字符)\n… …"
+                    + "\n… …(中间省略 " + (s.length() - PREVIEW_CHARS - 200) + " 个字符)… …\n… …"
                     + s.substring(s.length() - 200));
+            // 预览是省略版, 不允许直接选中复制(否则用户会以为数字不全); 点它直接看完整数字
+            result.setTextIsSelectable(false);
+            result.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showFullResult();
+                }
+            });
+            viewAll.setVisibility(View.VISIBLE);
         }
         StringBuilder sb = new StringBuilder();
         sb.append("共 ").append(s.length()).append(" 个字符");
         if (v.approx) sb.append(" · 近似值(").append(Calc.reliableOf(v, limits)).append(" 位有效数字)");
+        if (resultTruncated) {
+            sb.append("\n上方只是头尾预览; 点「").append(getString(R.string.view_all))
+              .append("」可逐页浏览完整数字, 也可复制全部或导出到文件");
+        }
         note.setText(sb.toString());
         note.setTextColor(getResources().getColor(R.color.md_on_surface_variant));
         hideProgress();
