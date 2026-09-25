@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="24dp"
+    android:paddingTop="8dp"
+    android:paddingRight="24dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/set_precision"
+        android:textColor="@color/md_on_surface_variant"
+        android:textSize="13sp" />
+
+    <EditText
+        android:id="@+id/setPrecision"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:textColor="@color/md_on_surface"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="@string/set_maxdigits"
+        android:textColor="@color/md_on_surface_variant"
+        android:textSize="13sp" />
+
+    <EditText
+        android:id="@+id/setMaxDigits"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:textColor="@color/md_on_surface"
+        android:textSize="16sp" />
+
+    <CheckBox
+        android:id="@+id/setForce"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/set_force"
+        android:textColor="@color/md_on_surface" />
+</LinearLayout>

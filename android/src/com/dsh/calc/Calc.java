@@ -3,26 +3,6 @@ package com.dsh.calc;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 计算器可预期错误(除数为 0、负数开方、语法错误等) */
-class CalcException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
-
-    CalcException(String msg) {
-        super(msg);
-    }
-}
-
-/** 精度与资源上限(与桌面版一致) */
-class Limits {
-    int precision = 50;
-    int maxDigits = 1000000;
-    boolean force = false;
-
-    int hardLimit() {
-        return force ? 100000000 : maxDigits;
-    }
-}
-
 /**
  * 表达式词法分析 + 递归下降求值。语法与桌面版 calc.exe 完全一致:
  *
@@ -35,7 +15,7 @@ class Limits {
  *        | 'pow' '(' expr ',' expr ')' | 'pi' | 'e'
  * </pre>
  */
-final class Calc {
+public final class Calc {
 
     private static final String PI_DIGITS =
             "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
@@ -95,6 +75,9 @@ final class Calc {
                 Token t = new Token();
                 t.k = Tok.IDENT;
                 t.text = s.substring(i, j).toLowerCase(java.util.Locale.US);
+                // π 是 Unicode 字母, 会走到这里(而不是下面按符号处理的分支),
+                // 键盘上的 π 按钮插入的就是这个字符, 统一归一化成 pi
+                if ("\u03C0".equals(t.text)) t.text = "pi";
                 out.add(t);
                 i = j;
                 continue;
@@ -276,7 +259,7 @@ final class Calc {
     }
 
     /** 求值入口 */
-    static BigDec evaluate(String expr, Limits L) {
+    public static BigDec evaluate(String expr, Limits L) {
         List<Token> toks = tokenize(expr);
         if (toks.size() == 1) throw new CalcException("表达式为空");
         Parser p = new Parser(toks, L);
@@ -287,7 +270,7 @@ final class Calc {
     }
 
     /** 与桌面版一致的近似值提示位数 */
-    static int reliableOf(BigDec v, Limits L) {
+    public static int reliableOf(BigDec v, Limits L) {
         return v.reliable > 0 ? v.reliable : L.precision;
     }
 }

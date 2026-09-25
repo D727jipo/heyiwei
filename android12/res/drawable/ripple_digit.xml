@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 数字键: 圆角 + 水波纹(Android 5.0 起自带 RippleDrawable) -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item android:drawable="@drawable/key_digit" />
+</ripple>

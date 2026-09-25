@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 启动画面(SplashScreen)用的图标: 居中绘制 √x, 颜色跟随主题 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/md_on_primary_container"
+        android:pathData="M30,52 L39,52 L45,74 L56,32 L60,32 L47,84 L41,84 Z" />
+    <path
+        android:fillColor="@color/md_on_primary_container"
+        android:pathData="M63,52 L76,52 L76,58 L63,58 Z" />
+    <path
+        android:fillColor="@color/md_on_primary_container"
+        android:pathData="M65,68 L83,86 L78,91 L60,73 Z" />
+    <path
+        android:fillColor="@color/md_on_primary_container"
+        android:pathData="M83,68 L65,86 L60,81 L78,63 Z" />
+</vector>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12 (Material You) 风格界面 —— 全部使用系统自带控件与主题, 不依赖任何第三方库。
+  配色来自系统动态取色(system_accent1/neutral1), 圆角、水波纹、高程均为平台能力。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_surface"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="16dp">
+
+        <!-- 标题栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/app_name"
+                android:textColor="@color/md_on_surface"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/kMenu"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/ripple_ghost"
+                android:contentDescription="@string/menu"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:padding="0dp"
+                android:text="@string/menu_glyph"
+                android:textColor="@color/md_on_surface"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <!-- 表达式输入 -->
+        <EditText
+            android:id="@+id/input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_input"
+            android:hint="@string/hint"
+            android:inputType="textNoSuggestions"
+            android:maxLines="3"
+            android:minHeight="64dp"
+            android:padding="16dp"
+            android:textColor="@color/md_on_surface"
+            android:textColorHint="@color/md_on_surface_variant"
+            android:textSize="20sp"
+            android:typeface="monospace" />
+
+        <CheckBox
+            android:id="@+id/live"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:checked="true"
+            android:text="@string/live"
+            android:textColor="@color/md_on_surface_variant"
+            android:textSize="14sp" />
+
+        <!-- 结果卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_card"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="56dp"
+                android:textColor="@color/md_on_surface"
+                android:textIsSelectable="true"
+                android:textSize="20sp"
+                android:typeface="monospace" />
+
+            <TextView
+                android:id="@+id/note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:max="100"
+                android:progressTint="@color/md_primary"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/progressText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_primary"
+                android:textSize="12sp"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 键盘: 圆角 + 水波纹 -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:columnCount="5"
+            android:rowCount="5">
+
+            <Button android:id="@+id/kClear" style="@style/GhostKey" android:text="@string/key_clear" />
+            <Button android:id="@+id/kBack" style="@style/GhostKey" android:text="@string/key_back" />
+            <Button android:id="@+id/kLP" style="@style/Key" android:text="(" />
+            <Button android:id="@+id/kRP" style="@style/Key" android:text=")" />
+            <Button android:id="@+id/kDiv" style="@style/OpKey" android:text="÷" />
+
+            <Button android:id="@+id/k7" style="@style/Key" android:text="7" />
+            <Button android:id="@+id/k8" style="@style/Key" android:text="8" />
+            <Button android:id="@+id/k9" style="@style/Key" android:text="9" />
+            <Button android:id="@+id/kPow" style="@style/OpKey" android:text="^" />
+            <Button android:id="@+id/kMul" style="@style/OpKey" android:text="×" />
+
+            <Button android:id="@+id/k4" style="@style/Key" android:text="4" />
+            <Button android:id="@+id/k5" style="@style/Key" android:text="5" />
+            <Button android:id="@+id/k6" style="@style/Key" android:text="6" />
+            <Button android:id="@+id/kSqrt" style="@style/OpKey" android:text="√" />
+            <Button android:id="@+id/kMinus" style="@style/OpKey" android:text="−" />
+
+            <Button android:id="@+id/k1" style="@style/Key" android:text="1" />
+            <Button android:id="@+id/k2" style="@style/Key" android:text="2" />
+            <Button android:id="@+id/k3" style="@style/Key" android:text="3" />
+            <Button android:id="@+id/kDot" style="@style/Key" android:text="." />
+            <Button android:id="@+id/kPlus" style="@style/OpKey" android:text="+" />
+
+            <Button android:id="@+id/k0" style="@style/Key" android:text="0" />
+            <Button android:id="@+id/kPi" style="@style/OpKey" android:text="π" />
+            <Button android:id="@+id/kE" style="@style/OpKey" android:text="e" />
+            <Button android:id="@+id/kCopy" style="@style/GhostKey" android:text="@string/key_copy_short" />
+            <Button android:id="@+id/kEq" style="@style/EqKey" android:text="@string/key_eq" />
+        </GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/help"
+            android:textColor="@color/md_on_surface_variant"
+            android:textSize="11sp" />
+    </LinearLayout>
+</ScrollView>

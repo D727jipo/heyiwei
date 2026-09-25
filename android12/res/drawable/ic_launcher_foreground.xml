@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 应用图标前景: √x 符号(矢量绘制) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 根号 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M28,52 L38,52 L45,76 L57,30 L62,30 L48,86 L41,86 Z" />
+    <!-- x -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M64,50 L78,50 L78,56 L64,56 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M66,68 L86,88 L80,94 L60,74 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M86,68 L66,88 L60,82 L80,62 Z" />
+</vector>

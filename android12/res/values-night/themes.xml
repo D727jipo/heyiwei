@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/md_surface</item>
+        <item name="android:colorAccent">@color/md_primary</item>
+        <item name="android:colorPrimary">@color/md_primary</item>
+        <item name="android:colorBackground">@color/md_surface</item>
+        <item name="android:textColorPrimary">@color/md_on_surface</item>
+    </style>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 深色配色(Android 9 及以下靠它; Android 10+ 走 DayNight 主题) -->
+<resources>
+    <color name="md_surface">#1C1B1F</color>
+    <color name="md_surface_variant">#49454F</color>
+    <color name="md_on_surface">#E6E1E5</color>
+    <color name="md_on_surface_variant">#CAC4D0</color>
+    <color name="md_primary">#D0BCFF</color>
+    <color name="md_on_primary">#381E72</color>
+    <color name="md_primary_container">#4F378B</color>
+    <color name="md_on_primary_container">#EADDFF</color>
+    <color name="md_outline">#938F99</color>
+    <color name="md_error">#F2B8B5</color>
+    <color name="md_scrim">#99000000</color>
+</resources>

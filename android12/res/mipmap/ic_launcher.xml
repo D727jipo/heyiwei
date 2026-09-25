@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 8.0 以下的图标回退: 主色圆角方块 + √x -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/md_primary"
+        android:pathData="M18,4 h72 a14,14 0 0 1 14,14 v72 a14,14 0 0 1 -14,14 h-72 a14,14 0 0 1 -14,-14 v-72 a14,14 0 0 1 14,-14 z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M26,52 L37,52 L44,76 L56,30 L61,30 L47,86 L40,86 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M64,50 L78,50 L78,56 L64,56 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M66,68 L86,88 L80,94 L60,74 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M86,68 L66,88 L60,82 L80,62 Z" />
+</vector>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 9 及以下的浅色回退主题(此时还没有动态取色) -->
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/md_surface</item>
+        <item name="android:colorAccent">@color/md_primary</item>
+        <item name="android:colorPrimary">@color/md_primary</item>
+        <item name="android:colorBackground">@color/md_surface</item>
+        <item name="android:textColorPrimary">@color/md_on_surface</item>
+    </style>
+</resources>

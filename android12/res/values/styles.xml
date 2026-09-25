@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 数字/括号键 -->
+    <style name="Key" parent="@android:style/Widget.Material.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:background">@drawable/ripple_digit</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:textColor">@color/md_on_surface</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <!-- 运算符键 -->
+    <style name="OpKey" parent="@style/Key">
+        <item name="android:background">@drawable/ripple_op</item>
+        <item name="android:textColor">@color/md_on_primary_container</item>
+    </style>
+
+    <!-- 等号(实心主色) -->
+    <style name="EqKey" parent="@style/Key">
+        <item name="android:background">@drawable/ripple_eq</item>
+        <item name="android:textColor">@color/md_on_primary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- 无底色键(C / ← / 复制) -->
+    <style name="GhostKey" parent="@style/Key">
+        <item name="android:background">@drawable/ripple_ghost</item>
+        <item name="android:textColor">@color/md_primary</item>
+    </style>
+</resources>
