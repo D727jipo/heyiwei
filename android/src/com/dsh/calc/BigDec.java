@@ -144,6 +144,70 @@ public final class BigDec {
         return d;
     }
 
+    // ======================= 常量 pi / e (按需计算) =======================
+
+    private static int gPiDigits = -1;
+    private static BigDec gPi;
+    private static int gEDigits = -1;
+    private static BigDec gE;
+
+    /**
+     * 圆周率, 给足 digits 位有效数字。
+     *
+     * <p>用 Brent–Salamin(AGM)迭代, 每轮有效位数翻倍, 所以位数再大也只需要
+     * log2(位数) 轮, 不必依赖硬编码的长常量(那样 precision 调大也没用)。
+     * 结果缓存在内存里, 同一精度不会重复算。
+     */
+    public static BigDec pi(int digits) {
+        if (digits < 1) digits = 1;
+        if (gPi != null && gPiDigits >= digits) return gPi.copy();
+
+        int k = digits + 20;                        // 多算 20 位保护位
+        BigInteger S = BigInteger.TEN.pow(k);       // 定点标度: 1 -> S
+        BigInteger a = S;                           // a0 = 1
+        BigInteger b = isqrt(S.multiply(S).divide(TWO));  // b0 = 1/sqrt(2)
+        BigInteger t = S.divide(BigInteger.valueOf(4));   // t0 = 1/4
+        BigInteger p = BigInteger.ONE;              // p0 = 1
+        int iters = (int) Math.ceil(Math.log((double) k * 3.3219280948873626) / Math.log(2.0)) + 2;
+        for (int i = 0; i < iters; ++i) {
+            BigInteger an = a.add(b).shiftRight(1);          // an = (a+b)/2
+            BigInteger d = a.subtract(an);
+            t = t.subtract(p.multiply(d).multiply(d).divide(S));  // t -= p*(a-an)^2
+            b = isqrt(a.multiply(b));                        // b = sqrt(a*b)
+            a = an;
+            p = p.shiftLeft(1);                              // p *= 2
+        }
+        BigInteger piScaled = a.add(b).pow(2).divide(t.shiftLeft(2));  // (a+b)^2 / (4t)
+
+        BigDec r = new BigDec(false, piScaled, -k);
+        r.approx = true;
+        gPi = r;
+        gPiDigits = digits;
+        return r.copy();
+    }
+
+    /** 自然常数 e = Σ 1/n!, 给足 digits 位有效数字 */
+    public static BigDec e(int digits) {
+        if (digits < 1) digits = 1;
+        if (gE != null && gEDigits >= digits) return gE.copy();
+
+        int k = digits + 30;                        // 每步截断会累积误差, 保护位给多一点
+        BigInteger S = BigInteger.TEN.pow(k);
+        BigInteger term = S;                        // 0! 项
+        BigInteger sum = S;
+        int n = 1;
+        while (term.signum() != 0 && n < 10000000) {
+            term = term.divide(BigInteger.valueOf(n));
+            sum = sum.add(term);
+            ++n;
+        }
+        BigDec r = new BigDec(false, sum, -k);
+        r.approx = true;
+        gE = r;
+        gEDigits = digits;
+        return r.copy();
+    }
+
     // ======================= 舍入 =======================
 
     /** 保留 prec 位有效数字(四舍五入) */

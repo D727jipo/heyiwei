@@ -17,10 +17,7 @@ import java.util.List;
  */
 public final class Calc {
 
-    private static final String PI_DIGITS =
-            "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
-    private static final String E_DIGITS =
-            "2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642742746639193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901";
+    // pi / e 不再用硬编码常量(那样 precision 调大也没用), 改为 BigDec.pi()/BigDec.e() 按需计算
 
     // ============================ 词法 ============================
 
@@ -240,13 +237,10 @@ public final class Calc {
                     expect(Tok.RPAREN, ")");
                     v = BigDec.pow(a, b, L);
                 } else if ("pi".equals(name)) {
-                    v = BigDec.fromDecimalString(PI_DIGITS);
-                    v.approx = true;
-                    v = BigDec.roundSig(v, L.precision);
+                    // 按当前有效位数实时算(位数上限 20000), 不再受硬编码常量长度限制
+                    v = BigDec.roundSig(BigDec.pi(L.precision), L.precision);
                 } else if ("e".equals(name)) {
-                    v = BigDec.fromDecimalString(E_DIGITS);
-                    v.approx = true;
-                    v = BigDec.roundSig(v, L.precision);
+                    v = BigDec.roundSig(BigDec.e(L.precision), L.precision);
                 } else {
                     throw new CalcException("未知的名称: " + name + " (可用: sqrt, pow, pi, e)");
                 }
