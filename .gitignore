@@ -1,0 +1,22 @@
+# 构建产物
+*.obj
+*.o
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.res
+
+# 构建目录
+build/
+out/
+cmake-build-*/
+.vs/
+
+# 编辑器/系统
+.vscode/
+.idea/
+*.user
+Thumbs.db
+desktop.ini
