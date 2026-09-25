@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 应用图标: 纯矢量(Android 自带 VectorDrawable), 不引入任何第三方资源 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M14,10 h80 a4,4 0 0 1 4,4 v80 a4,4 0 0 1 -4,4 h-80 a4,4 0 0 1 -4,-4 v-80 a4,4 0 0 1 4,-4 z" />
+
+    <!-- 根号 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,58 l8,0 l6,22 l10,-44 l4,0 l-13,54 l-6,0 z" />
+
+    <!-- x 的幂次符号位置: 用一个上标方块 + 横竖笔画表示 x² -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M56,36 l26,0 l0,6 l-26,0 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M62,74 l22,22 l-6,6 l-22,-22 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M84,74 l-22,22 l-6,-6 l22,-22 z" />
+</vector>

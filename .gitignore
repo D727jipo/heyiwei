@@ -1,0 +1,10 @@
+# 构建中间产物
+build/
+out/
+__pycache__/
+*.obj
+*.idsig
+*.class
+
+# 临时工作目录
+_gitwork/
