@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">大数计算器 12</string>
+    <string name="app_name">科学计算器plus(科学计算器+)</string>
     <string name="hint">输入表达式, 例如 2^100 或 sqrt(2)</string>
     <string name="live">边输入边算(实时)</string>
     <string name="menu">菜单</string>

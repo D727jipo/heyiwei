@@ -3,6 +3,8 @@
 // 大数运算: 任意位数, 次方不受 double 范围限制
 // 实时输出: 长耗时计算(huge 次方/乘法/开方/输出)会实时显示"算到哪了"的进度
 #include "bigdec.h"
+#include "scifunc.h"
+#include "mathconst.h"   // pi/e 高精度常量(20102 位), 覆盖 precision 上限 20000
 
 #include <algorithm>
 #include <cctype>
@@ -19,7 +21,7 @@
 
 using namespace calc;
 
-static const char* APP_VERSION = "1.1.0";
+static const char* APP_VERSION = "3.0";
 
 // ============================ 字符串小工具 ============================
 
@@ -174,6 +176,7 @@ static std::vector<Token> tokenize(const std::string& s) {
             Token t;
             t.k = Tok::Ident;
             t.text = toLowerA(s.substr(i, j - i));
+            if (t.text == "\xCF\x80") t.text = "pi";   // π 统一当成 pi
             out.push_back(t);
             i = j;
             continue;
@@ -237,10 +240,6 @@ static std::vector<Token> tokenize(const std::string& s) {
 // atom   := 数字 | '(' expr ')' | '√' atom | 'sqrt' ( '(' expr ')' | atom )
 //         | 'pow' '(' expr ',' expr ')' | 'pi' | 'e'
 
-static const char* PI_DIGITS =
-    "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
-static const char* E_DIGITS =
-    "2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642742746639193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901";
 
 struct Parser {
     const std::vector<Token>& t;
@@ -329,14 +328,16 @@ struct Parser {
         } else if (cur().k == Tok::Ident) {
             std::string name = cur().text;
             ++i;
-            if (name == "sqrt") {
+            auto parseArg = [&]() -> BigDec {
                 if (accept(Tok::LParen)) {
-                    v = parseExpr();
+                    BigDec a = parseExpr();
                     expect(Tok::RParen, ")");
-                } else {
-                    v = parseAtom();
+                    return a;
                 }
-                v = decSqrt(v, L);
+                return parseAtom();
+            };
+            if (name == "sqrt") {
+                v = decSqrt(parseArg(), L);
             } else if (name == "pow") {
                 expect(Tok::LParen, "(");
                 BigDec a = parseExpr();
@@ -352,8 +353,51 @@ struct Parser {
                 v = decFromString(E_DIGITS);
                 v.approx = true;
                 v = decRoundSig(v, L.precision);
+            } else if (name == "abs") {
+                v = decAbs(parseArg());
+            } else if (name == "floor") {
+                v = decFloor(parseArg());
+            } else if (name == "ceil") {
+                v = decCeil(parseArg());
+            } else if (name == "round") {
+                v = decRound(parseArg());
+            } else if (name == "fact") {
+                v = decFact(parseArg(), L);
+            } else if (name == "rad") {
+                v = degToRad(parseArg(), L);
+            } else if (name == "deg") {
+                v = radToDeg(parseArg(), L);
+            } else if (name == "sin") {
+                v = decSin(parseArg(), L);
+            } else if (name == "cos") {
+                v = decCos(parseArg(), L);
+            } else if (name == "tan") {
+                v = decTan(parseArg(), L);
+            } else if (name == "asin") {
+                v = decAsin(parseArg(), L);
+            } else if (name == "acos") {
+                v = decAcos(parseArg(), L);
+            } else if (name == "atan") {
+                v = decAtan(parseArg(), L);
+            } else if (name == "sinh") {
+                v = decSinh(parseArg(), L);
+            } else if (name == "cosh") {
+                v = decCosh(parseArg(), L);
+            } else if (name == "tanh") {
+                v = decTanh(parseArg(), L);
+            } else if (name == "exp") {
+                v = decExp(parseArg(), L);
+            } else if (name == "log" || name == "ln") {
+                v = decLog(parseArg(), L);
+            } else if (name == "log10") {
+                v = decLog10(parseArg(), L);
+            } else if (name == "log2") {
+                v = decLog2(parseArg(), L);
             } else {
-                throw CalcError("未知的名称: " + name + " (可用: sqrt, pow, pi, e)");
+                throw CalcError("未知的名称: " + name +
+                    " (可用: sqrt, pow, pi, e, abs, floor, ceil, round, fact,"
+                    " sin, cos, tan, asin, acos, atan, sinh, cosh, tanh,"
+                    " exp, log, ln, log10, log2, rad, deg)");
             }
         } else {
             throw CalcError("语法错误: 缺少操作数");
@@ -405,8 +449,13 @@ static void printResultLine(const BigDec& v, const Limits& L, bool bare) {
 static void printHelp() {
     std::cout <<
         "支持: +  -  *  /  ^(次方, 也可写 **)  √(开平方, 也可写 sqrt)  () 括号\n"
-        "      函数: sqrt(x)  pow(a,b)   常量: pi  e\n"
+        "      科学函数: sin cos tan asin acos atan  sinh cosh tanh\n"
+        "                exp log ln log10 log2  abs floor ceil round fact\n"
+        "                rad(角度转弧度) deg(弧度转角度)   常量: pi e π\n"
         "      也接受 × ÷ 与全角括号\n"
+        "\n"
+        "说明: 三角函数默认使用弧度制; 可用 rad(x) 把角度转成弧度后再计算,\n"
+        "      例如 sin(rad(30)) = 0.5。科学函数走浮点近似, 可靠位数约 15 位。\n"
         "\n"
         "实时输出: 耗时的计算(大次方/大乘法/大开方/超长结果输出)会在 stderr 上\n"
         "          实时显示进度(算到哪一步、已经多少位), 不干扰 stdout 上的结果\n"
@@ -430,7 +479,10 @@ static void printHelp() {
         "  2^100                  -> 1267650600228229401496703205376 (精确, 不限大小)\n"
         "  2^1000 3^500 ...       -> 任意大整数次方\n"
         "  1/7                    -> 0.142857...(保留 precision 位)\n"
-        "  pow(2,100)  或  2**100   -> 同上\n";
+        "  pow(2,100)  或  2**100   -> 同上\n"
+        "  sin(1)  cos(0)  tan(pi/4)  -> 三角函数(弧度)\n"
+        "  log(e)  exp(1)  log10(100)  -> 对数/指数\n"
+        "  fact(20)  abs(-5)  floor(2.7)  -> 整数/取整\n";
 }
 
 static void printAbout() {
@@ -466,7 +518,8 @@ static void printUsage() {
         "  calc.exe \"2^100\"\n"
         "  calc.exe \"sqrt(2)\" -p 100\n"
         "  calc.exe --force \"2^4000000\"     (120 万位, 可以看到实时进度)\n"
-        "  calc.exe \"1/(3-3)\"        (退出码 1, 提示除数不能等于0)\n";
+        "  calc.exe \"1/(3-3)\"        (退出码 1, 提示除数不能等于0)\n"
+        "  calc.exe \"sin(rad(30))\"  calc.exe \"log10(1000)\"  calc.exe \"fact(20)\"\n";
 }
 
 static void clearScreen() {
@@ -543,7 +596,8 @@ static int runInteractive(Limits& L) {
     if (tty) {
         std::cout << "=== 命令行计算器 (任意精度) v" << APP_VERSION << " ===\n";
         std::cout << "输入表达式直接回车计算; 输入 help 查看帮助, exit 退出。\n";
-        std::cout << "例如: 1+2*3   2^100   sqrt(2)   √9   1/0(会给出错误提示)\n\n";
+        std::cout << "例如: 1+2*3   2^100   sqrt(2)   √9   sin(1)   log10(100)   fact(20)\n";
+        std::cout << "      1/0(会给出错误提示)   输入 help 查看全部科学函数\n\n";
         std::cout.flush();
     }
     std::string line;

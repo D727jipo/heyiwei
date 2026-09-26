@@ -38,6 +38,17 @@
                 android:textStyle="bold" />
 
             <Button
+                android:id="@+id/kSci"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/ripple_ghost"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="科学"
+                android:textColor="@color/md_primary" />
+
+            <Button
                 android:id="@+id/kMenu"
                 android:layout_width="48dp"
                 android:layout_height="48dp"

@@ -11,7 +11,11 @@
 * **除法会判断除数是否为 0**，是则报错 `除数不能等于0`（不会崩溃、不会输出 inf/nan）；
 * **次方不受 double 范围限制**（不是 `pow()` 的 1e308 上限），`2^1000000` 也能算，且整数结果**精确**、完整输出；
 * 开平方支持完全平方的精确结果与任意精度近似；
+* **科学函数**：`sin` `cos` `tan` `asin` `acos` `atan` `sinh` `cosh` `tanh` `exp` `log`/`ln` `log10` `log2` `abs` `floor` `ceil` `round` `fact`，以及角度/弧度互转 `rad` `deg`（三角函数默认弧度制，可用 `rad()` 转角度）；Android 版同步支持；
 * **实时输出计算进度**：像 `2^4000000` 这种要算几秒的运算，会实时刷新「算到第几步、已经多少位」（见第 5 节）。
+
+> 注：科学函数走浮点近似，可靠位数约 15 位，会像其他近似结果一样标注 `(近似值: N 位有效数字)`。
+> `abs` `floor` `ceil` `round` `fact` 是精确的大数实现，不受该限制。
 
 ---
 
@@ -203,6 +207,8 @@ D:\计算器\
 │   ├── bigdec.h        任意精度大数库接口(BigInt / BigDec)
 │   ├── bigdec.cpp      大数实现: 10^9 进制 limb、Karatsuba 乘法、Knuth 除法、
 │   │                   Newton 整数开方、BigDec 四则/次方/开方/格式化
+│   ├── scifunc.h       科学函数接口(sin/cos/tan/exp/log/...)
+│   ├── scifunc.cpp     科学函数实现(三角/双曲/指数/对数 + 精确 abs/floor/ceil/round/fact)
 │   └── main.cpp        词法分析、递归下降求值、交互界面、命令行参数
 ├── tests\
 │   └── run_tests.py    交叉验证脚本(以 Python 大整数/Decimal 为标准答案)
@@ -245,5 +251,5 @@ python tests\run_tests.py
 
 本项目采用 **MIT License** —— 可以自由使用、修改、分发（包括商业用途），只需保留版权声明与许可声明。详见 [LICENSE](LICENSE)。
 
-##其实我也不知道桌面端有什么用，这个项目主要是给安卓用的。
-##这个项目完全由DeepSeek编写（其实是因为作者是初中生，只会python...）没有人工参与！
+## 其实我也不知道桌面端有什么用，这个项目主要是给安卓用的。
+## 这个项目完全由DeepSeek编写（其实是因为作者是初中生，只会python...）没有人工参与！

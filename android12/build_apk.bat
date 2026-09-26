@@ -80,16 +80,16 @@ echo [apk12] 4/8 javac (core from android + this UI)
 "%JAVA_HOME%\bin\javac.exe" -encoding UTF-8 -source 1.8 -target 1.8 -nowarn ^
   -bootclasspath "%ANDROID_JAR%" -classpath "%ANDROID_JAR%" ^
   -d build\classes build\gen\com\dsh\calc12\R.java ^
-  "%CORE%\BigDec.java" "%CORE%\Calc.java" "%CORE%\CalcException.java" "%CORE%\Limits.java" ^
-  src\com\dsh\calc12\MainActivity.java
+  "%CORE%\BigDec.java" "%CORE%\Calc.java" "%CORE%\CalcException.java" "%CORE%\Limits.java" "%CORE%\SciFunc.java" ^
+  src\com\dsh\calc12\MainActivity.java src\com\dsh\calc12\SciActivity.java
 if errorlevel 1 (
   echo [apk12]    -source 1.8 not supported, retry with --release 11
   rmdir /s /q build\classes & mkdir build\classes
   "%JAVA_HOME%\bin\javac.exe" -encoding UTF-8 --release 11 -nowarn ^
     -classpath "%ANDROID_JAR%" ^
     -d build\classes build\gen\com\dsh\calc12\R.java ^
-    "%CORE%\BigDec.java" "%CORE%\Calc.java" "%CORE%\CalcException.java" "%CORE%\Limits.java" ^
-    src\com\dsh\calc12\MainActivity.java
+    "%CORE%\BigDec.java" "%CORE%\Calc.java" "%CORE%\CalcException.java" "%CORE%\Limits.java" "%CORE%\SciFunc.java" ^
+    src\com\dsh\calc12\MainActivity.java src\com\dsh\calc12\SciActivity.java
 )
 if errorlevel 1 goto :fail
 

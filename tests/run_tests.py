@@ -57,6 +57,27 @@ def check_error(desc, expr, needle, extra_args=None):
         passed += 1
 
 
+def check_approx(desc, expr, expected, tol=Decimal('1e-14'), extra_args=None):
+    """科学函数近似校验: 输出与期望的相对/绝对误差不超过 tol"""
+    global passed
+    args = list(extra_args or []) + [expr]
+    rc, out, err = run(args)
+    if rc != 0:
+        fails.append(f"[{desc}] {expr!r}\n   期望 rc=0, 实际 rc={rc} err={err!r}")
+        return
+    try:
+        got = Decimal(out.strip())
+        want = Decimal(expected)
+        diff = abs(got - want)
+        scale = max(abs(want), Decimal(1))
+        if diff > tol * scale:
+            fails.append(f"[{desc}] {expr!r}\n   期望约 {expected}\n   实际 {out.strip()} (误差 {diff})")
+        else:
+            passed += 1
+    except Exception as e:
+        fails.append(f"[{desc}] {expr!r}\n   无法解析输出 {out.strip()!r}: {e}")
+
+
 def dec_str(d, prec, approx=False):
     """把 Decimal 按 prec 位有效数字四舍五入, 再按 calc 的格式规则输出字符串"""
     with decimal.localcontext() as ctx:
@@ -220,9 +241,63 @@ check_error('空表达式', '   ', '表达式为空')
 check_error('未知名称', 'foo(2)', '未知的名称')
 check_error('缺少参数', 'pow(1)', '语法错误')
 
+# ---------------------------------------------------------------- pi/e 位数跟随 precision
+# 回归: 之前 pi/e 是硬编码常量(最多 202 字符), precision 调大也无效
+rc, out, err = run(['-p', '300', 'pi'])
+if rc != 0 or len(out) != 301:
+    fails.append(f"[pi 300位] 期望 301 字符, 实际 {len(out)} err={err!r}")
+else:
+    passed += 1
+
+rc, out, err = run(['-p', '20000', 'pi'])
+if rc != 0 or len(out) != 20001:
+    fails.append(f"[pi 20000位] 期望 20001 字符, 实际 {len(out)} err={err!r}")
+else:
+    passed += 1
+
+rc, out, err = run(['-p', '500', 'e'])
+if rc != 0 or len(out) != 501:
+    fails.append(f"[e 500位] 期望 501 字符, 实际 {len(out)} err={err!r}")
+else:
+    passed += 1
+
+rc, out, err = run(['-p', '3000', 'sqrt(2)'])
+if rc != 0 or len(out) < 3000:
+    fails.append(f"[sqrt2 3000位] 期望 >=3000 字符, 实际 {len(out)} err={err!r}")
+else:
+    passed += 1
+
+# ---------------------------------------------------------------- 科学函数
+check_approx('sin(1)', 'sin(1)', '0.8414709848078965', Decimal('1e-15'))
+check_approx('cos(0)', 'cos(0)', '1', Decimal('1e-15'))
+check_approx('tan(pi/4)', 'tan(pi/4)', '1', Decimal('1e-14'))
+check_approx('sin(rad(30))', 'sin(rad(30))', '0.5', Decimal('1e-14'))
+check_approx('exp(1)', 'exp(1)', '2.718281828459045', Decimal('1e-14'))
+check_approx('log(e)', 'log(e)', '1', Decimal('1e-14'))
+check_approx('log10(1000)', 'log10(1000)', '3', Decimal('1e-14'))
+check_approx('log2(8)', 'log2(8)', '3', Decimal('1e-14'))
+check_approx('asin(1)', 'asin(1)', '1.5707963267948966', Decimal('1e-14'))
+check_approx('acos(0)', 'acos(0)', '1.5707963267948966', Decimal('1e-14'))
+check_approx('atan(1)', 'atan(1)', '0.7853981633974483', Decimal('1e-15'))
+check_approx('sinh(1)', 'sinh(1)', '1.1752011936438014', Decimal('1e-14'))
+check_approx('cosh(1)', 'cosh(1)', '1.5430806348152437', Decimal('1e-14'))
+check_approx('tanh(1)', 'tanh(1)', '0.7615941559557649', Decimal('1e-15'))
+check_approx('rad(180)', 'rad(180)', '3.141592653589793', Decimal('1e-14'))
+check_approx('deg(pi)', 'deg(pi)', '180', Decimal('1e-14'))
+check('fact(20)', 'fact(20)', '2432902008176640000')
+check('fact(0)', 'fact(0)', '1')
+check('abs(-5)', 'abs(-5)', '5')
+check('floor(2.7)', 'floor(2.7)', '2')
+check('ceil(2.1)', 'ceil(2.1)', '3')
+check('round(2.5)', 'round(2.5)', '3')
+check('round(-2.5)', 'round(-2.5)', '-3')
+check_error('log(0)', 'log(0)', '对数的真数必须大于 0')
+check_error('asin(2)', 'asin(2)', 'asin 定义域为 [-1, 1]')
+check_error('fact(-1)', 'fact(-1)', '阶乘仅对非负整数有定义')
+
 # ---------------------------------------------------------------- 命令行选项
 rc, out, err = run(['--version'])
-if rc != 0 or 'v1.0.0' not in out:
+if rc != 0 or 'v3.0' not in out:
     fails.append(f"[--version] rc={rc} out={out!r}")
 else:
     passed += 1

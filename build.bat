@@ -46,7 +46,7 @@ if defined VCVARS (
     popd
     exit /b 1
   )
-  cl /nologo /std:c++17 /utf-8 /O2 /W4 /EHsc /MT /DNDEBUG /Fobuild\ /Fe:calc.exe src\bigdec.cpp src\main.cpp
+  cl /nologo /std:c++17 /utf-8 /O2 /W4 /EHsc /MT /DNDEBUG /Fobuild\ /Fe:calc.exe src\bigdec.cpp src\scifunc.cpp src\main.cpp
   if errorlevel 1 (
     echo [build] ERROR: compilation failed
     popd
@@ -54,7 +54,7 @@ if defined VCVARS (
   )
 ) else (
   echo [build] using MinGW: %GXX%
-  %GXX% -std=c++17 -O2 -Wall -Wextra -static -o calc.exe src\bigdec.cpp src\main.cpp
+  %GXX% -std=c++17 -O2 -Wall -Wextra -static -o calc.exe src\bigdec.cpp src\scifunc.cpp src\main.cpp
   if errorlevel 1 (
     echo [build] ERROR: compilation failed
     popd

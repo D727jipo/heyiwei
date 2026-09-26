@@ -34,4 +34,38 @@
         <item name="android:background">@drawable/ripple_ghost</item>
         <item name="android:textColor">@color/md_primary</item>
     </style>
+
+    <!-- ===== 科学计算器(横屏)专用: 按屏幕比例缩放, 平板/手机都填满 ===== -->
+    <style name="SciKey" parent="@android:style/Widget.Material.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:background">@drawable/ripple_digit</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/md_on_surface</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="SciOpKey" parent="@style/SciKey">
+        <item name="android:background">@drawable/ripple_op</item>
+        <item name="android:textColor">@color/md_on_primary_container</item>
+    </style>
+
+    <style name="SciGhostKey" parent="@style/SciKey">
+        <item name="android:background">@drawable/ripple_ghost</item>
+        <item name="android:textColor">@color/md_primary</item>
+    </style>
+
+    <style name="SciEqKey" parent="@style/SciKey">
+        <item name="android:background">@drawable/ripple_eq</item>
+        <item name="android:textColor">@color/md_on_primary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

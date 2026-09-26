@@ -91,6 +91,19 @@ public class MainActivity extends Activity {
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Handler ui = new Handler(Looper.getMainLooper());
 
+    /** 进度回调是进程级单例(科学计算器界面也会注册), 谁在前台谁持有 */
+    private final BigDec.Progress progressCallback = new BigDec.Progress() {
+        @Override
+        public void onProgress(final String msg, final int percent) {
+            ui.post(new Runnable() {
+                @Override
+                public void run() {
+                    showProgress(msg, percent);
+                }
+            });
+        }
+    };
+
     private int generation = 0;
     private Runnable pendingEval;
     private volatile boolean computing = false;
@@ -139,17 +152,7 @@ public class MainActivity extends Activity {
         applyEdgeToEdge();
         loadPrefs();
 
-        BigDec.setProgress(new BigDec.Progress() {
-            @Override
-            public void onProgress(final String msg, final int percent) {
-                ui.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        showProgress(msg, percent);
-                    }
-                });
-            }
-        });
+        BigDec.setProgress(progressCallback);
 
         int[] ids = {R.id.k0, R.id.k1, R.id.k2, R.id.k3, R.id.k4, R.id.k5, R.id.k6, R.id.k7,
                 R.id.k8, R.id.k9, R.id.kDot, R.id.kPlus, R.id.kMinus, R.id.kMul, R.id.kDiv,
@@ -197,6 +200,12 @@ public class MainActivity extends Activity {
                 showMenu(v);
             }
         });
+        findViewById(R.id.kSci).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SciActivity.class));
+            }
+        });
 
         input.addTextChangedListener(new TextWatcher() {
             @Override
@@ -212,6 +221,13 @@ public class MainActivity extends Activity {
                 if (liveBox.isChecked()) scheduleLiveEval();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 从科学计算器界面返回时, 重新接管进度回调(科学界面销毁时会把它置空)
+        BigDec.setProgress(progressCallback);
     }
 
     @Override

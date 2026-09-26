@@ -207,6 +207,15 @@ public final class Calc {
             return b;
         }
 
+        BigDec parseFuncArg() {
+            if (accept(Tok.LPAREN)) {
+                BigDec a = parseExpr();
+                expect(Tok.RPAREN, ")");
+                return a;
+            }
+            return parseAtom();
+        }
+
         BigDec parseAtom() {
             enter();
             BigDec v;
@@ -222,13 +231,7 @@ public final class Calc {
                 String name = cur().text;
                 ++i;
                 if ("sqrt".equals(name)) {
-                    if (accept(Tok.LPAREN)) {
-                        v = parseExpr();
-                        expect(Tok.RPAREN, ")");
-                    } else {
-                        v = parseAtom();
-                    }
-                    v = BigDec.sqrt(v, L);
+                    v = BigDec.sqrt(parseFuncArg(), L);
                 } else if ("pow".equals(name)) {
                     expect(Tok.LPAREN, "(");
                     BigDec a = parseExpr();
@@ -241,8 +244,51 @@ public final class Calc {
                     v = BigDec.roundSig(BigDec.pi(L.precision), L.precision);
                 } else if ("e".equals(name)) {
                     v = BigDec.roundSig(BigDec.e(L.precision), L.precision);
+                } else if ("abs".equals(name)) {
+                    v = SciFunc.abs(parseFuncArg());
+                } else if ("floor".equals(name)) {
+                    v = SciFunc.floor(parseFuncArg());
+                } else if ("ceil".equals(name)) {
+                    v = SciFunc.ceil(parseFuncArg());
+                } else if ("round".equals(name)) {
+                    v = SciFunc.round(parseFuncArg());
+                } else if ("fact".equals(name)) {
+                    v = SciFunc.fact(parseFuncArg(), L);
+                } else if ("rad".equals(name)) {
+                    v = SciFunc.degToRad(parseFuncArg(), L);
+                } else if ("deg".equals(name)) {
+                    v = SciFunc.radToDeg(parseFuncArg(), L);
+                } else if ("sin".equals(name)) {
+                    v = SciFunc.sin(parseFuncArg(), L);
+                } else if ("cos".equals(name)) {
+                    v = SciFunc.cos(parseFuncArg(), L);
+                } else if ("tan".equals(name)) {
+                    v = SciFunc.tan(parseFuncArg(), L);
+                } else if ("asin".equals(name)) {
+                    v = SciFunc.asin(parseFuncArg(), L);
+                } else if ("acos".equals(name)) {
+                    v = SciFunc.acos(parseFuncArg(), L);
+                } else if ("atan".equals(name)) {
+                    v = SciFunc.atan(parseFuncArg(), L);
+                } else if ("sinh".equals(name)) {
+                    v = SciFunc.sinh(parseFuncArg(), L);
+                } else if ("cosh".equals(name)) {
+                    v = SciFunc.cosh(parseFuncArg(), L);
+                } else if ("tanh".equals(name)) {
+                    v = SciFunc.tanh(parseFuncArg(), L);
+                } else if ("exp".equals(name)) {
+                    v = SciFunc.exp(parseFuncArg(), L);
+                } else if ("log".equals(name) || "ln".equals(name)) {
+                    v = SciFunc.log(parseFuncArg(), L);
+                } else if ("log10".equals(name)) {
+                    v = SciFunc.log10(parseFuncArg(), L);
+                } else if ("log2".equals(name)) {
+                    v = SciFunc.log2(parseFuncArg(), L);
                 } else {
-                    throw new CalcException("未知的名称: " + name + " (可用: sqrt, pow, pi, e)");
+                    throw new CalcException("未知的名称: " + name +
+                        " (可用: sqrt, pow, pi, e, abs, floor, ceil, round, fact," +
+                        " sin, cos, tan, asin, acos, atan, sinh, cosh, tanh," +
+                        " exp, log, ln, log10, log2, rad, deg)");
                 }
             } else {
                 throw new CalcException("语法错误: 缺少操作数");

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  科学计算器横屏界面 —— 布局参照系统计算器的科学模式:
+  左侧函数键区(3列), 右侧数字/运算键区(4列), 显示区在上方。
+  键盘用权重(LinearLayout weight)填满剩余空间, 按键随屏幕大小自适应缩放,
+  平板上不会再出现"按键太小 + 大片空白"的问题。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sciRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_surface"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingTop="6dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="8dp">
+
+    <!-- 顶栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="@color/md_on_surface"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/sciExit"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:background="@drawable/ripple_ghost"
+            android:minWidth="0dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:text="普通模式"
+            android:textColor="@color/md_primary"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- 表达式输入 -->
+    <EditText
+        android:id="@+id/sciInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_input"
+        android:hint="@string/hint"
+        android:inputType="textNoSuggestions"
+        android:maxLines="2"
+        android:minHeight="40dp"
+        android:padding="10dp"
+        android:textColor="@color/md_on_surface"
+        android:textColorHint="@color/md_on_surface_variant"
+        android:textSize="16sp"
+        android:typeface="monospace" />
+
+    <!-- 结果(截断预览最多 7 行, 完整数字走「查看全部数字」) -->
+    <TextView
+        android:id="@+id/sciResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:maxLines="7"
+        android:minHeight="34dp"
+        android:textColor="@color/md_on_surface"
+        android:textIsSelectable="true"
+        android:textSize="16sp"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/sciNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:textColor="@color/md_on_surface_variant"
+        android:textSize="11sp" />
+
+    <Button
+        android:id="@+id/sciViewAll"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:layout_marginTop="3dp"
+        android:background="@drawable/ripple_ghost"
+        android:text="@string/view_all"
+        android:textColor="@color/md_primary"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <!-- 计算进度(大数运算时实时显示, 与普通模式一致) -->
+    <ProgressBar
+        android:id="@+id/sciProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:max="100"
+        android:progressTint="@color/md_primary"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/sciProgressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textColor="@color/md_primary"
+        android:textSize="11sp"
+        android:visibility="invisible" />
+
+    <!-- 键盘: 左函数区(3列×6行) + 右数字区(4列×6行), 高度按权重填满剩余空间 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="6dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- 左: 函数区 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skLP" style="@style/SciKey" android:text="(" />
+                <Button android:id="@+id/skRP" style="@style/SciKey" android:text=")" />
+                <Button android:id="@+id/skRecip" style="@style/SciKey" android:text="1/x" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skSq" style="@style/SciKey" android:text="x²" />
+                <Button android:id="@+id/skCube" style="@style/SciKey" android:text="x³" />
+                <Button android:id="@+id/skPowY" style="@style/SciKey" android:text="x^y" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skFact" style="@style/SciKey" android:text="x!" />
+                <Button android:id="@+id/skSqrt" style="@style/SciKey" android:text="√" />
+                <Button android:id="@+id/skRootY" style="@style/SciKey" android:text="y√x" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skE" style="@style/SciKey" android:text="e" />
+                <Button android:id="@+id/skLn" style="@style/SciKey" android:text="ln" />
+                <Button android:id="@+id/skLog" style="@style/SciKey" android:text="log" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skSin" style="@style/SciKey" android:text="sin" />
+                <Button android:id="@+id/skCos" style="@style/SciKey" android:text="cos" />
+                <Button android:id="@+id/skTan" style="@style/SciKey" android:text="tan" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skInv" style="@style/SciGhostKey" android:text="Inv" />
+                <Button android:id="@+id/skRadDeg" style="@style/SciGhostKey" android:text="Rad" />
+                <Button android:id="@+id/skPi" style="@style/SciKey" android:text="π" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 右: 数字/运算区 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="6dp"
+            android:layout_weight="4"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skMC" style="@style/SciGhostKey" android:text="MC" />
+                <Button android:id="@+id/skMPlus" style="@style/SciGhostKey" android:text="M+" />
+                <Button android:id="@+id/skMMinus" style="@style/SciGhostKey" android:text="M−" />
+                <Button android:id="@+id/skMR" style="@style/SciGhostKey" android:text="MR" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/skClear" style="@style/SciGhostKey" android:text="C" />
+                <Button android:id="@+id/skDiv" style="@style/SciOpKey" android:text="÷" />
+                <Button android:id="@+id/skMul" style="@style/SciOpKey" android:text="×" />
+                <Button android:id="@+id/skBack" style="@style/SciGhostKey" android:text="⌫" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/sk7" style="@style/SciKey" android:text="7" />
+                <Button android:id="@+id/sk8" style="@style/SciKey" android:text="8" />
+                <Button android:id="@+id/sk9" style="@style/SciKey" android:text="9" />
+                <Button android:id="@+id/skMinus" style="@style/SciOpKey" android:text="−" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/sk4" style="@style/SciKey" android:text="4" />
+                <Button android:id="@+id/sk5" style="@style/SciKey" android:text="5" />
+                <Button android:id="@+id/sk6" style="@style/SciKey" android:text="6" />
+                <Button android:id="@+id/skPlus" style="@style/SciOpKey" android:text="+" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/sk1" style="@style/SciKey" android:text="1" />
+                <Button android:id="@+id/sk2" style="@style/SciKey" android:text="2" />
+                <Button android:id="@+id/sk3" style="@style/SciKey" android:text="3" />
+                <Button android:id="@+id/skPercent" style="@style/SciKey" android:text="%" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+                <Button android:id="@+id/sk0" style="@style/SciKey" android:text="0" />
+                <Button android:id="@+id/skDot" style="@style/SciKey" android:text="." />
+                <Button android:id="@+id/skEq" style="@style/SciEqKey" android:text="=" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:maxLines="1"
+        android:text="Inv 切换反函数 · Rad/Deg 切换角度制 · % 即 /100 · 缺右括号自动补全"
+        android:textColor="@color/md_on_surface_variant"
+        android:textSize="10sp" />
+</LinearLayout>
