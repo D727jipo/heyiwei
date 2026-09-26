@@ -1,3 +1,5 @@
+# ⚠️ 该项目从即日起无限期停止维护，但不归档。
+
 # 科学计算器 (桌面版 C++ 命令行 + Android 版 APK)
 
 > Android 版 APK：calc-android.apk（原生框架版，见 [android/README-Android.md](android/README-Android.md)）
