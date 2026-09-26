@@ -58,6 +58,9 @@ public class SciActivity extends Activity {
     private ProgressBar progressBar;
     private Button viewAll;
     private View root;
+    private View keypad;
+    private TextView title;
+    private TextView hint;
 
     private Limits limits = new Limits();
     private BigDec lastValue = null;   // 最近一次计算结果(供 M+/M− 使用)
@@ -99,6 +102,9 @@ public class SciActivity extends Activity {
                 .getBoolean("force", false);
 
         root = findViewById(R.id.sciRoot);
+        keypad = findViewById(R.id.sciKeypad);
+        title = (TextView) findViewById(R.id.sciTitle);
+        hint = (TextView) findViewById(R.id.sciHint);
         input = (EditText) findViewById(R.id.sciInput);
         result = (TextView) findViewById(R.id.sciResult);
         note = (TextView) findViewById(R.id.sciNote);
@@ -113,8 +119,7 @@ public class SciActivity extends Activity {
         });
 
         applyEdgeToEdge();
-
-        // ---- 左侧函数区: 插入文本在点击时按 Inv/Deg 状态动态决定 ----
+        applyKeySizing();
         bindInsert(R.id.skLP, "(");
         bindInsert(R.id.skRP, ")");
         bindInsert(R.id.skRecip, "1/(");
@@ -263,6 +268,38 @@ public class SciActivity extends Activity {
             }
         });
         root.requestApplyInsets();
+    }
+
+    // ======================= 按键尺寸自适应(按屏幕宽高比动态计算, 不写死) =======================
+
+    /**
+     * 检测屏幕宽高比与可用高度, 动态决定:
+     * <ul>
+     *   <li>键区最小高度 —— 大屏(平板)键区按权重铺满; 高度不足的屏(长比例直板机横屏)
+     *       保证每颗按键不低于可用高度, 装不下时整体滚动, 任何机型都不会把按键压扁;</li>
+     *   <li>紧凑模式 —— 宽高比 >= 1.85 或屏幕高度偏小时隐藏标题/提示行、压缩输入框,
+     *       把空间留给键盘。</li>
+     * </ul>
+     */
+    private void applyKeySizing() {
+        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+        float density = dm.density;
+        float hDp = dm.heightPixels / density;                       // 横屏下 = 短边
+        float aspect = (float) dm.widthPixels / (float) dm.heightPixels;  // 宽/高, 横屏 > 1
+
+        boolean compact = aspect >= 1.85f || hDp < 420f;
+        title.setVisibility(compact ? View.GONE : View.VISIBLE);
+        hint.setVisibility(compact ? View.GONE : View.VISIBLE);
+        input.setMinHeight((int) ((compact ? 34f : 40f) * density));
+        result.setMinHeight((int) ((compact ? 26f : 34f) * density));
+
+        // 键盘区目标占屏高的 58%, 平分给 6 行; 长比例屏保底 46dp, 全局 40~64dp
+        float keyDp = hDp * 0.58f / 6f;
+        if (compact) keyDp = Math.max(keyDp, 46f);
+        keyDp = Math.min(Math.max(keyDp, 40f), 64f);
+
+        // 6 行按键 + 每行上下 2dp 边距; 权重只在空间富余时放大, 不足时以 minHeight 为准
+        keypad.setMinimumHeight((int) ((6 * keyDp + 24f) * density));
     }
 
     // ======================= 输入 =======================
