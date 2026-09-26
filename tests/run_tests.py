@@ -297,7 +297,7 @@ check_error('fact(-1)', 'fact(-1)', '阶乘仅对非负整数有定义')
 
 # ---------------------------------------------------------------- 命令行选项
 rc, out, err = run(['--version'])
-if rc != 0 or 'v3.0' not in out:
+if rc != 0 or 'v3.4' not in out:
     fails.append(f"[--version] rc={rc} out={out!r}")
 else:
     passed += 1

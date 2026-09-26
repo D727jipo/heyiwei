@@ -21,7 +21,7 @@
 
 using namespace calc;
 
-static const char* APP_VERSION = "3.0";
+static const char* APP_VERSION = "3.4";
 
 // ============================ 字符串小工具 ============================
 
