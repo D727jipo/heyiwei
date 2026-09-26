@@ -1,4 +1,4 @@
-# 大数计算器 (桌面版 C++ 命令行 + Android 版 APK)
+# 科学计算器 (桌面版 C++ 命令行 + Android 版 APK)
 
 > Android 版 APK：calc-android.apk（原生框架版，见 [android/README-Android.md](android/README-Android.md)）
 > 与 calc-android12.apk（Android 12 Material You 版，见 [android12/README-Android12.md](android12/README-Android12.md)），包名不同可同时安装。
