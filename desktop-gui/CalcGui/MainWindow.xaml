@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="CalcGui.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls">
+
+    <Grid x:Name="RootGrid" Background="{ThemeResource CalcSurfaceBrush}" Padding="16,10,16,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- 0 顶栏 -->
+            <RowDefinition Height="Auto"/>   <!-- 1 输入 -->
+            <RowDefinition Height="Auto"/>   <!-- 2 结果 -->
+            <RowDefinition Height="Auto"/>   <!-- 3 查看全部 -->
+            <RowDefinition Height="Auto"/>   <!-- 4 进度 -->
+            <RowDefinition Height="*"/>      <!-- 5 键盘(拉伸填满剩余空间) -->
+            <RowDefinition Height="Auto"/>   <!-- 6 提示 -->
+        </Grid.RowDefinitions>
+
+        <!-- 顶栏 -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="科学计算器plus(科学计算器+)"
+                       Foreground="{ThemeResource CalcOnSurfaceBrush}"
+                       FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Button Grid.Column="1" x:Name="CopyButton" Style="{StaticResource GhostKey}"
+                    Content="复制" Height="34" MinWidth="64" Padding="12,0" VerticalAlignment="Center"
+                    Margin="0,0,8,0" Click="CopyButton_Click"/>
+            <Button Grid.Column="2" x:Name="ModeButton" Style="{StaticResource GhostKey}"
+                    Content="科学" Height="34" MinWidth="72" Padding="12,0" VerticalAlignment="Center"
+                    Margin="0,0,8,0" Click="ModeButton_Click"/>
+            <Button Grid.Column="3" x:Name="SettingsButton" Style="{StaticResource GhostKey}"
+                    Content="设置" Height="34" MinWidth="64" Padding="12,0" VerticalAlignment="Center"
+                    Margin="0,0,8,0" Click="SettingsButton_Click"/>
+            <Button Grid.Column="4" x:Name="MoreButton" Style="{StaticResource GhostKey}"
+                    Content="⋮" FontSize="18" Height="34" MinWidth="40" Padding="0" VerticalAlignment="Center">
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="历史记录" Click="HistoryButton_Click"/>
+                        <MenuFlyoutItem Text="清空历史记录" Click="ClearHistory_Click"/>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </Grid>
+
+        <!-- 表达式输入 -->
+        <TextBox Grid.Row="1" x:Name="InputBox"
+                 Margin="0,8,0,0" MinHeight="46" MaxHeight="84"
+                 FontFamily="Consolas" FontSize="16"
+                 TextWrapping="Wrap" AcceptsReturn="False"
+                 IsSpellCheckEnabled="False" PlaceholderText="输入表达式, 例如 2^100 或 sqrt(2)"
+                 CornerRadius="12"
+                 Background="{ThemeResource CalcInputBrush}"
+                 Foreground="{ThemeResource CalcOnSurfaceBrush}"/>
+
+        <!-- 结果卡片 -->
+        <Border Grid.Row="2" Margin="0,8,0,0" Padding="12,8" CornerRadius="12"
+                Background="{ThemeResource CalcCardBrush}">
+            <StackPanel>
+                <TextBlock x:Name="ResultText"
+                           FontFamily="Consolas" FontSize="16"
+                           Foreground="{ThemeResource CalcOnSurfaceBrush}"
+                           TextWrapping="Wrap" MaxHeight="104"
+                           IsTextSelectionEnabled="True"
+                           Tapped="ResultText_Tapped"/>
+                <TextBlock x:Name="NoteText" Margin="0,4,0,0" FontSize="11"
+                           Foreground="{ThemeResource CalcOnSurfaceVarBrush}"
+                           TextWrapping="Wrap" MaxLines="2"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 查看全部数字 -->
+        <Button Grid.Row="3" x:Name="ViewAllButton" Style="{StaticResource GhostKey}"
+                Content="查看全部数字" Height="32" Margin="0,6,0,0"
+                Visibility="Collapsed" Click="ViewAllButton_Click"/>
+
+        <!-- 计算进度 -->
+        <StackPanel Grid.Row="4" x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,6,0,0">
+            <ProgressBar x:Name="CalcProgress" IsIndeterminate="True" Maximum="100"/>
+            <TextBlock x:Name="ProgressText" FontSize="11" Margin="0,2,0,0"
+                       Foreground="{ThemeResource CalcPrimaryBrush}" MaxLines="1"
+                       TextTrimming="CharacterEllipsis"/>
+        </StackPanel>
+
+        <!-- 键盘 -->
+        <Grid Grid.Row="5" Margin="0,8,0,0">
+            <!-- ===== 普通键盘 (5列×5行) ===== -->
+            <Grid x:Name="NormalPad">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="56"/><RowDefinition Height="56"/>
+                    <RowDefinition Height="56"/><RowDefinition Height="56"/>
+                    <RowDefinition Height="56"/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0" Grid.Column="0" x:Name="KeyClear"  Style="{StaticResource GhostKey}" Content="C"  Click="ClearButton_Click"/>
+                <Button Grid.Row="0" Grid.Column="1" x:Name="KeyBack"   Style="{StaticResource GhostKey}" Content="←"  Click="BackspaceButton_Click"/>
+                <Button Grid.Row="0" Grid.Column="2" x:Name="KeyLP"     Style="{StaticResource KeyBtn}" Content="("  Tag="("/>
+                <Button Grid.Row="0" Grid.Column="3" x:Name="KeyRP"     Style="{StaticResource KeyBtn}" Content=")"  Tag=")"/>
+                <Button Grid.Row="0" Grid.Column="4" x:Name="KeyDiv"    Style="{StaticResource OpKey}"  Content="÷"  Tag="÷"/>
+
+                <Button Grid.Row="1" Grid.Column="0" x:Name="Key7"      Style="{StaticResource KeyBtn}" Content="7"  Tag="7"/>
+                <Button Grid.Row="1" Grid.Column="1" x:Name="Key8"      Style="{StaticResource KeyBtn}" Content="8"  Tag="8"/>
+                <Button Grid.Row="1" Grid.Column="2" x:Name="Key9"      Style="{StaticResource KeyBtn}" Content="9"  Tag="9"/>
+                <Button Grid.Row="1" Grid.Column="3" x:Name="KeyPow"    Style="{StaticResource OpKey}"  Content="^"  Tag="^"/>
+                <Button Grid.Row="1" Grid.Column="4" x:Name="KeyMul"    Style="{StaticResource OpKey}"  Content="×"  Tag="×"/>
+
+                <Button Grid.Row="2" Grid.Column="0" x:Name="Key4"      Style="{StaticResource KeyBtn}" Content="4"  Tag="4"/>
+                <Button Grid.Row="2" Grid.Column="1" x:Name="Key5"      Style="{StaticResource KeyBtn}" Content="5"  Tag="5"/>
+                <Button Grid.Row="2" Grid.Column="2" x:Name="Key6"      Style="{StaticResource KeyBtn}" Content="6"  Tag="6"/>
+                <Button Grid.Row="2" Grid.Column="3" x:Name="KeySqrt"   Style="{StaticResource OpKey}"  Content="√"  Tag="sqrt("/>
+                <Button Grid.Row="2" Grid.Column="4" x:Name="KeyMinus"  Style="{StaticResource OpKey}"  Content="−"  Tag="−"/>
+
+                <Button Grid.Row="3" Grid.Column="0" x:Name="Key1"      Style="{StaticResource KeyBtn}" Content="1"  Tag="1"/>
+                <Button Grid.Row="3" Grid.Column="1" x:Name="Key2"      Style="{StaticResource KeyBtn}" Content="2"  Tag="2"/>
+                <Button Grid.Row="3" Grid.Column="2" x:Name="Key3"      Style="{StaticResource KeyBtn}" Content="3"  Tag="3"/>
+                <Button Grid.Row="3" Grid.Column="3" x:Name="KeyDot"    Style="{StaticResource KeyBtn}" Content="."  Tag="."/>
+                <Button Grid.Row="3" Grid.Column="4" x:Name="KeyPlus"   Style="{StaticResource OpKey}"  Content="+"  Tag="+"/>
+
+                <Button Grid.Row="4" Grid.Column="0" x:Name="Key0"      Style="{StaticResource KeyBtn}" Content="0"  Tag="0"/>
+                <Button Grid.Row="4" Grid.Column="1" x:Name="KeyPi"     Style="{StaticResource OpKey}"  Content="π"  Tag="π"/>
+                <Button Grid.Row="4" Grid.Column="2" x:Name="KeyE"      Style="{StaticResource OpKey}"  Content="e"  Tag="e"/>
+                <Button Grid.Row="4" Grid.Column="3" x:Name="KeyCopy"   Style="{StaticResource GhostKey}" Content="复制" Click="CopyButton_Click"/>
+                <Button Grid.Row="4" Grid.Column="4" x:Name="KeyEq"     Style="{StaticResource EqKey}"  Content="="  Click="EqButton_Click"/>
+            </Grid>
+
+            <!-- ===== 科学键盘 (左函数3列 + 右数字4列) ===== -->
+            <Grid x:Name="SciPad" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="4*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Grid.Column="0" x:Name="skLP"     Style="{StaticResource KeyBtn}" Content="("    Tag="("/>
+                    <Button Grid.Row="0" Grid.Column="1" x:Name="skRP"     Style="{StaticResource KeyBtn}" Content=")"    Tag=")"/>
+                    <Button Grid.Row="0" Grid.Column="2" x:Name="skRecip"  Style="{StaticResource KeyBtn}" Content="1/x"  Tag="1/("/>
+
+                    <Button Grid.Row="1" Grid.Column="0" x:Name="skSq"     Style="{StaticResource KeyBtn}" Content="x²"   Tag="^2"/>
+                    <Button Grid.Row="1" Grid.Column="1" x:Name="skCube"   Style="{StaticResource KeyBtn}" Content="x³"   Tag="^3"/>
+                    <Button Grid.Row="1" Grid.Column="2" x:Name="skPowY"   Style="{StaticResource KeyBtn}" Content="x^y"  Tag="^"/>
+
+                    <Button Grid.Row="2" Grid.Column="0" x:Name="skFact"   Style="{StaticResource KeyBtn}" Content="x!"   Tag="fact("/>
+                    <Button Grid.Row="2" Grid.Column="1" x:Name="skSqrt"   Style="{StaticResource KeyBtn}" Content="√"    Tag="sqrt("/>
+                    <Button Grid.Row="2" Grid.Column="2" x:Name="skRootY"  Style="{StaticResource KeyBtn}" Content="y√x"  Tag="^(1/"/>
+
+                    <Button Grid.Row="3" Grid.Column="0" x:Name="skE"      Style="{StaticResource KeyBtn}" Content="e"    Tag="e"/>
+                    <Button Grid.Row="3" Grid.Column="1" x:Name="skLn"     Style="{StaticResource KeyBtn}" Content="ln"   Click="DynamicKey_Click" Tag="ln"/>
+                    <Button Grid.Row="3" Grid.Column="2" x:Name="skLog"    Style="{StaticResource KeyBtn}" Content="log"  Click="DynamicKey_Click" Tag="log"/>
+
+                    <Button Grid.Row="4" Grid.Column="0" x:Name="skSin"    Style="{StaticResource KeyBtn}" Content="sin"  Click="DynamicKey_Click" Tag="sin"/>
+                    <Button Grid.Row="4" Grid.Column="1" x:Name="skCos"    Style="{StaticResource KeyBtn}" Content="cos"  Click="DynamicKey_Click" Tag="cos"/>
+                    <Button Grid.Row="4" Grid.Column="2" x:Name="skTan"    Style="{StaticResource KeyBtn}" Content="tan"  Click="DynamicKey_Click" Tag="tan"/>
+
+                    <Button Grid.Row="5" Grid.Column="0" x:Name="skInv"    Style="{StaticResource GhostKey}" Content="Inv" Click="InvButton_Click"/>
+                    <Button Grid.Row="5" Grid.Column="1" x:Name="skRadDeg" Style="{StaticResource GhostKey}" Content="Rad" Click="RadDegButton_Click"/>
+                    <Button Grid.Row="5" Grid.Column="2" x:Name="skPi"     Style="{StaticResource KeyBtn}" Content="π"    Tag="π"/>
+                </Grid>
+
+                <Grid Grid.Column="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/><RowDefinition Height="*"/><RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Grid.Column="0" x:Name="skMC"     Style="{StaticResource GhostKey}" Content="MC" Click="MCButton_Click"/>
+                    <Button Grid.Row="0" Grid.Column="1" x:Name="skMPlus"  Style="{StaticResource GhostKey}" Content="M+" Click="MPlusButton_Click"/>
+                    <Button Grid.Row="0" Grid.Column="2" x:Name="skMMinus" Style="{StaticResource GhostKey}" Content="M−" Click="MMinusButton_Click"/>
+                    <Button Grid.Row="0" Grid.Column="3" x:Name="skMR"     Style="{StaticResource GhostKey}" Content="MR" Click="MRButton_Click"/>
+
+                    <Button Grid.Row="1" Grid.Column="0" x:Name="skClear"  Style="{StaticResource GhostKey}" Content="C"  Click="ClearButton_Click"/>
+                    <Button Grid.Row="1" Grid.Column="1" x:Name="skDiv"    Style="{StaticResource OpKey}"  Content="÷"  Tag="÷"/>
+                    <Button Grid.Row="1" Grid.Column="2" x:Name="skMul"    Style="{StaticResource OpKey}"  Content="×"  Tag="×"/>
+                    <Button Grid.Row="1" Grid.Column="3" x:Name="skBack"   Style="{StaticResource GhostKey}" Content="⌫" Click="BackspaceButton_Click"/>
+
+                    <Button Grid.Row="2" Grid.Column="0" x:Name="sk7"      Style="{StaticResource KeyBtn}" Content="7"  Tag="7"/>
+                    <Button Grid.Row="2" Grid.Column="1" x:Name="sk8"      Style="{StaticResource KeyBtn}" Content="8"  Tag="8"/>
+                    <Button Grid.Row="2" Grid.Column="2" x:Name="sk9"      Style="{StaticResource KeyBtn}" Content="9"  Tag="9"/>
+                    <Button Grid.Row="2" Grid.Column="3" x:Name="skMinus"  Style="{StaticResource OpKey}"  Content="−"  Tag="−"/>
+
+                    <Button Grid.Row="3" Grid.Column="0" x:Name="sk4"      Style="{StaticResource KeyBtn}" Content="4"  Tag="4"/>
+                    <Button Grid.Row="3" Grid.Column="1" x:Name="sk5"      Style="{StaticResource KeyBtn}" Content="5"  Tag="5"/>
+                    <Button Grid.Row="3" Grid.Column="2" x:Name="sk6"      Style="{StaticResource KeyBtn}" Content="6"  Tag="6"/>
+                    <Button Grid.Row="3" Grid.Column="3" x:Name="skPlus"   Style="{StaticResource OpKey}"  Content="+"  Tag="+"/>
+
+                    <Button Grid.Row="4" Grid.Column="0" x:Name="sk1"      Style="{StaticResource KeyBtn}" Content="1"  Tag="1"/>
+                    <Button Grid.Row="4" Grid.Column="1" x:Name="sk2"      Style="{StaticResource KeyBtn}" Content="2"  Tag="2"/>
+                    <Button Grid.Row="4" Grid.Column="2" x:Name="sk3"      Style="{StaticResource KeyBtn}" Content="3"  Tag="3"/>
+                    <Button Grid.Row="4" Grid.Column="3" x:Name="skPercent" Style="{StaticResource KeyBtn}" Content="%" Tag="/100"/>
+
+                    <Button Grid.Row="5" Grid.Column="0" x:Name="sk0"      Style="{StaticResource KeyBtn}" Content="0"  Tag="0"/>
+                    <Button Grid.Row="5" Grid.Column="1" x:Name="skDot"    Style="{StaticResource KeyBtn}" Content="."  Tag="."/>
+                    <Button Grid.Row="5" Grid.Column="2" x:Name="skExp"    Style="{StaticResource OpKey}"  Content="exp" Click="DynamicKey_Click" Tag="exp"/>
+                    <Button Grid.Row="5" Grid.Column="3" x:Name="skEq"     Style="{StaticResource EqKey}"  Content="="  Click="EqButton_Click"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- 底部提示 -->
+        <TextBlock Grid.Row="6" x:Name="HintText" Margin="0,8,0,0" FontSize="11"
+                   Foreground="{ThemeResource CalcOnSurfaceVarBrush}"
+                   Text="支持 + − × ÷ ^(次方) √(开平方) 括号; 函数 sqrt(x) pow(a,b); 常量 pi e · 大数精确计算"/>
+
+        <!-- 完整结果分页查看器: 窗口内覆盖层(不用 ContentDialog, 大文本下更稳定) -->
+        <Grid x:Name="FullResultPanel" Grid.Row="0" Grid.RowSpan="7"
+              Background="{ThemeResource CalcSurfaceBrush}"
+              Visibility="Collapsed" Padding="16,10,16,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="完整结果" FontSize="18" FontWeight="Bold"
+                           Foreground="{ThemeResource CalcOnSurfaceBrush}" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" x:Name="frClose" Style="{StaticResource GhostKey}"
+                        Content="关闭" Height="34" MinWidth="72" Padding="12,0" Click="FrClose_Click"/>
+            </Grid>
+
+            <TextBlock Grid.Row="1" x:Name="frInfo" FontSize="12" Margin="0,4,0,0"
+                       Foreground="{ThemeResource CalcOnSurfaceVarBrush}"/>
+
+            <TextBox Grid.Row="2" x:Name="frText" Margin="0,8,0,0"
+                     AcceptsReturn="True" IsReadOnly="True" TextWrapping="Wrap"
+                     FontFamily="Consolas" FontSize="12"
+                     Background="{ThemeResource CalcInputBrush}"
+                     Foreground="{ThemeResource CalcOnSurfaceBrush}"
+                     CornerRadius="8"/>
+
+            <Grid Grid.Row="3" Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" x:Name="frFirst" Style="{StaticResource GhostKey}" Content="首页"   Height="40" Margin="2" Click="FrFirst_Click"/>
+                <Button Grid.Column="1" x:Name="frPrev"  Style="{StaticResource GhostKey}" Content="上一页" Height="40" Margin="2" Click="FrPrev_Click"/>
+                <Button Grid.Column="2" x:Name="frNext"  Style="{StaticResource GhostKey}" Content="下一页" Height="40" Margin="2" Click="FrNext_Click"/>
+                <Button Grid.Column="3" x:Name="frLast"  Style="{StaticResource GhostKey}" Content="末页"   Height="40" Margin="2" Click="FrLast_Click"/>
+            </Grid>
+
+            <Grid Grid.Row="4" Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" x:Name="frCopyPage" Style="{StaticResource OpKey}" Content="复制本页"     Height="40" Margin="2" Click="FrCopyPage_Click"/>
+                <Button Grid.Column="1" x:Name="frCopyAll"  Style="{StaticResource OpKey}" Content="复制全部"     Height="40" Margin="2" Click="FrCopyAll_Click"/>
+                <Button Grid.Column="2" x:Name="frExport"   Style="{StaticResource EqKey}"  Content="导出到桌面" Height="40" Margin="2" Click="FrExport_Click"/>
+            </Grid>
+        </Grid>
+
+        <!-- 历史记录(窗口内覆盖层) -->
+        <Grid x:Name="HistoryPanel" Grid.Row="0" Grid.RowSpan="7"
+              Background="{ThemeResource CalcSurfaceBrush}"
+              Visibility="Collapsed" Padding="16,10,16,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="历史记录" FontSize="18" FontWeight="Bold"
+                           Foreground="{ThemeResource CalcOnSurfaceBrush}" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" x:Name="hClearBtn" Style="{StaticResource GhostKey}"
+                        Content="清空历史" Height="34" MinWidth="80" Padding="12,0" Margin="0,0,8,0"
+                        Click="ClearHistory_Click"/>
+                <Button Grid.Column="2" x:Name="hCloseBtn" Style="{StaticResource GhostKey}"
+                        Content="关闭" Height="34" MinWidth="72" Padding="12,0"
+                        Click="HistoryClose_Click"/>
+            </Grid>
+
+            <TextBlock Grid.Row="1" Margin="0,4,0,0" FontSize="12"
+                       Foreground="{ThemeResource CalcOnSurfaceVarBrush}"
+                       Text="点击条目重新填入算式 · 最多保留 100 条"/>
+            <ScrollViewer Grid.Row="2" Margin="0,8,0,0">
+                <StackPanel x:Name="HistoryList" Padding="4"/>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

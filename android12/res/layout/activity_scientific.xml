@@ -41,6 +41,20 @@
                 android:textStyle="bold" />
 
             <Button
+                android:id="@+id/sciMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/ripple_ghost"
+                android:contentDescription="@string/menu"
+                android:minWidth="0dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="⋮"
+                android:textColor="@color/md_on_surface"
+                android:textSize="18sp" />
+
+            <Button
                 android:id="@+id/sciExit"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"

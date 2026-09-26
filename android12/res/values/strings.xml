@@ -23,6 +23,10 @@
     <string name="theme_dark">深色</string>
     <string name="theme_toast">已切换为%s</string>
     <string name="full_result_title">完整结果</string>
+    <string name="history_title">历史记录</string>
+    <string name="history_clear">清空历史</string>
+    <string name="history_hint">点击条目重新填入算式 · 长按复制结果 · 最多保留 100 条</string>
+    <string name="menu_history">历史记录</string>
     <string name="full_result_close">关闭</string>
     <string name="view_all">查看全部数字</string>
     <string name="fr_first">首页</string>

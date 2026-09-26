@@ -24,6 +24,7 @@ import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
@@ -381,7 +382,116 @@ public class MainActivity extends Activity {
         });
     }
 
+    // ======================= 历史记录 =======================
+
+    private void openHistoryDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_history);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+        final LinearLayout list = (LinearLayout) dialog.findViewById(R.id.hList);
+        fillHistoryList(this, list, input, dialog);
+        dialog.findViewById(R.id.hClose).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.findViewById(R.id.hClear).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CalcHistory.clear(MainActivity.this);
+                list.removeAllViews();
+                TextView empty = new TextView(MainActivity.this);
+                empty.setText("暂无历史记录");
+                empty.setTextColor(getResources().getColor(R.color.md_on_surface_variant));
+                empty.setTextSize(13);
+                empty.setPadding(8, 16, 8, 16);
+                list.addView(empty);
+                Toast.makeText(MainActivity.this, "历史记录已清空", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
+    }
+
+    static void fillHistoryList(android.app.Activity act, LinearLayout list,
+                                EditText input, final Dialog dialog) {
+        java.util.List<CalcHistory.Entry> items = CalcHistory.load(act);
+        float density = act.getResources().getDisplayMetrics().density;
+        int pad = (int) (8 * density);
+        if (items.isEmpty()) {
+            TextView empty = new TextView(act);
+            empty.setText("暂无历史记录");
+            empty.setTextColor(act.getResources().getColor(R.color.md_on_surface_variant));
+            empty.setTextSize(13);
+            empty.setPadding(8, 16, 8, 16);
+            list.addView(empty);
+            return;
+        }
+        for (final CalcHistory.Entry en : items) {
+            LinearLayout row = new LinearLayout(act);
+            row.setOrientation(LinearLayout.VERTICAL);
+            row.setPadding(pad, pad, pad, pad);
+            TextView e = new TextView(act);
+            e.setText(en.expr);
+            e.setTextColor(act.getResources().getColor(R.color.md_on_surface_variant));
+            e.setTextSize(12);
+            e.setTypeface(android.graphics.Typeface.MONOSPACE);
+            TextView r = new TextView(act);
+            r.setText("= " + en.result);
+            r.setTextColor(act.getResources().getColor(R.color.md_on_surface));
+            r.setTextSize(14);
+            r.setTypeface(android.graphics.Typeface.MONOSPACE);
+            r.setMaxLines(3);
+            r.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            row.addView(e);
+            row.addView(r);
+            row.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    input.setText(en.expr);
+                    input.setSelection(en.expr.length());
+                    dialog.dismiss();
+                }
+            });
+            row.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    ClipboardManager cm = (ClipboardManager)
+                            act.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cm != null) {
+                        cm.setPrimaryClip(ClipData.newPlainText("计算结果", en.result));
+                        Toast.makeText(act, "已复制 " + en.result.length() + " 个字符",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+            });
+            list.addView(row);
+            View divider = new View(act);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1);
+            lp.setMargins(pad * 2, 0, pad * 2, 0);
+            divider.setLayoutParams(lp);
+            divider.setBackgroundColor(0x3379747E);
+            list.addView(divider);
+        }
+    }
+
     // ======================= 完整结果查看器 =======================
+
+
+    /** 显示用: 每行 100 位强制换行(纯数字串没有断行点, TextView 无法自动折行) */
+    private static String formatDigitsPage(String s) {
+        StringBuilder sb = new StringBuilder(s.length() + s.length() / 100 + 2);
+        for (int i = 0; i < s.length(); i += 100) {
+            if (i > 0) sb.append('\n');
+            sb.append(s, i, Math.min(s.length(), i + 100));
+        }
+        return sb.toString();
+    }
 
     /** 分页浏览完整数字: 结果再长也能一页页看完, 不再只有省略号 */
     private void showFullResult() {
@@ -411,7 +521,7 @@ public class MainActivity extends Activity {
             public void run() {
                 int from = page[0] * PAGE_CHARS;
                 int to = Math.min(fullResult.length(), from + PAGE_CHARS);
-                text.setText(fullResult.substring(from, to));
+                text.setText(formatDigitsPage(fullResult.substring(from, to)));
                 info.setText("共 " + fullResult.length() + " 个字符 · 第 " + (page[0] + 1)
                         + " / " + pages + " 页 (每页 " + PAGE_CHARS + " 字符)");
                 first.setEnabled(page[0] > 0);
@@ -495,16 +605,20 @@ public class MainActivity extends Activity {
     private void showMenu(View anchor) {
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.getMenu().add(0, 1, 0, R.string.menu_settings);
-        menu.getMenu().add(0, 2, 1, R.string.menu_copy);
-        menu.getMenu().add(0, 4, 2, R.string.view_all);
-        menu.getMenu().add(0, 5, 3, R.string.fr_export);
-        menu.getMenu().add(0, 3, 4, R.string.menu_about);
+        menu.getMenu().add(0, 6, 1, R.string.menu_history);
+        menu.getMenu().add(0, 2, 2, R.string.menu_copy);
+        menu.getMenu().add(0, 4, 3, R.string.view_all);
+        menu.getMenu().add(0, 5, 4, R.string.fr_export);
+        menu.getMenu().add(0, 3, 5, R.string.menu_about);
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case 1:
                         showSettings();
+                        return true;
+                    case 6:
+                        openHistoryDialog();
                         return true;
                     case 2:
                         copyResult();
@@ -571,6 +685,8 @@ public class MainActivity extends Activity {
                     public void run() {
                         computing = false;
                         if (myGen != generation) return;
+                        if (explicit && v != null && err == null)
+                            CalcHistory.add(MainActivity.this, text, v.toString());
                         showProgressOrResult(v, err);
                     }
                 });

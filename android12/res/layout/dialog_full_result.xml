@@ -72,24 +72,28 @@
         <Button
             android:id="@+id/frFirst"
             style="@style/Key"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_first" />
 
         <Button
             android:id="@+id/frPrev"
             style="@style/Key"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_prev" />
 
         <Button
             android:id="@+id/frNext"
             style="@style/Key"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_next" />
 
         <Button
             android:id="@+id/frLast"
             style="@style/Key"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_last" />
     </LinearLayout>
@@ -103,18 +107,21 @@
         <Button
             android:id="@+id/frCopyPage"
             style="@style/OpKey"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_copy_page" />
 
         <Button
             android:id="@+id/frCopyAll"
             style="@style/OpKey"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_copy_all" />
 
         <Button
             android:id="@+id/frExport"
             style="@style/EqKey"
+            android:layout_height="44dp"
             android:layout_weight="1"
             android:text="@string/fr_export" />
     </LinearLayout>

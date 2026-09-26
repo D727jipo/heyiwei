@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="CalcGui.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <!-- 深色(默认): 与安卓 Material You 深色配色一致 -->
+                        <ResourceDictionary x:Key="Dark">
+                            <SolidColorBrush x:Key="CalcSurfaceBrush" Color="#1C1B1F"/>
+                            <SolidColorBrush x:Key="CalcOnSurfaceBrush" Color="#E6E1E5"/>
+                            <SolidColorBrush x:Key="CalcOnSurfaceVarBrush" Color="#CAC4D0"/>
+                            <SolidColorBrush x:Key="CalcPrimaryBrush" Color="#D0BCFF"/>
+                            <SolidColorBrush x:Key="CalcOnPrimaryBrush" Color="#381E72"/>
+                            <SolidColorBrush x:Key="CalcPrimaryContainerBrush" Color="#4F378B"/>
+                            <SolidColorBrush x:Key="CalcOnPrimaryContainerBrush" Color="#EADDFF"/>
+                            <SolidColorBrush x:Key="CalcErrorBrush" Color="#F2B8B5"/>
+                            <SolidColorBrush x:Key="CalcKeyBrush" Color="#303134"/>
+                            <SolidColorBrush x:Key="CalcInputBrush" Color="#2B2A2F"/>
+                            <SolidColorBrush x:Key="CalcCardBrush" Color="#232228"/>
+                        </ResourceDictionary>
+                        <!-- 浅色 -->
+                        <ResourceDictionary x:Key="Light">
+                            <SolidColorBrush x:Key="CalcSurfaceBrush" Color="#FFFBFE"/>
+                            <SolidColorBrush x:Key="CalcOnSurfaceBrush" Color="#1C1B1F"/>
+                            <SolidColorBrush x:Key="CalcOnSurfaceVarBrush" Color="#49454F"/>
+                            <SolidColorBrush x:Key="CalcPrimaryBrush" Color="#6750A4"/>
+                            <SolidColorBrush x:Key="CalcOnPrimaryBrush" Color="#FFFFFF"/>
+                            <SolidColorBrush x:Key="CalcPrimaryContainerBrush" Color="#EADDFF"/>
+                            <SolidColorBrush x:Key="CalcOnPrimaryContainerBrush" Color="#21005D"/>
+                            <SolidColorBrush x:Key="CalcErrorBrush" Color="#B3261E"/>
+                            <SolidColorBrush x:Key="CalcKeyBrush" Color="#E7E0EC"/>
+                            <SolidColorBrush x:Key="CalcInputBrush" Color="#ECE6F0"/>
+                            <SolidColorBrush x:Key="CalcCardBrush" Color="#F3EDF7"/>
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Default">
+                            <SolidColorBrush x:Key="CalcSurfaceBrush" Color="#1C1B1F"/>
+                            <SolidColorBrush x:Key="CalcOnSurfaceBrush" Color="#E6E1E5"/>
+                            <SolidColorBrush x:Key="CalcOnSurfaceVarBrush" Color="#CAC4D0"/>
+                            <SolidColorBrush x:Key="CalcPrimaryBrush" Color="#D0BCFF"/>
+                            <SolidColorBrush x:Key="CalcOnPrimaryBrush" Color="#381E72"/>
+                            <SolidColorBrush x:Key="CalcPrimaryContainerBrush" Color="#4F378B"/>
+                            <SolidColorBrush x:Key="CalcOnPrimaryContainerBrush" Color="#EADDFF"/>
+                            <SolidColorBrush x:Key="CalcErrorBrush" Color="#F2B8B5"/>
+                            <SolidColorBrush x:Key="CalcKeyBrush" Color="#303134"/>
+                            <SolidColorBrush x:Key="CalcInputBrush" Color="#2B2A2F"/>
+                            <SolidColorBrush x:Key="CalcCardBrush" Color="#232228"/>
+                        </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+
+                    <!-- 药丸按钮模板: 悬停/按下用透明度反馈, 不覆盖自定义配色 -->
+                    <ControlTemplate x:Key="PillButtonTemplate" TargetType="Button">
+                        <Grid x:Name="Root"
+                              Background="{TemplateBinding Background}"
+                              BorderBrush="{TemplateBinding BorderBrush}"
+                              BorderThickness="{TemplateBinding BorderThickness}"
+                              CornerRadius="{TemplateBinding CornerRadius}">
+                            <ContentPresenter x:Name="ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              HorizontalContentAlignment="Center"
+                                              VerticalContentAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              FontSize="{TemplateBinding FontSize}"
+                                              FontWeight="{TemplateBinding FontWeight}"
+                                              FontFamily="{TemplateBinding FontFamily}"/>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="PointerOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Root"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.82" Duration="0:0:0.08"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Root"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.62" Duration="0:0:0.05"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Root"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.4" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </ControlTemplate>
+
+                    <!-- 数字/括号键 -->
+                    <Style x:Key="KeyBtn" TargetType="Button">
+                        <Setter Property="Template" Value="{StaticResource PillButtonTemplate}"/>
+                        <Setter Property="Background" Value="{ThemeResource CalcKeyBrush}"/>
+                        <Setter Property="Foreground" Value="{ThemeResource CalcOnSurfaceBrush}"/>
+                        <Setter Property="CornerRadius" Value="20"/>
+                        <Setter Property="FontSize" Value="16"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                        <Setter Property="Margin" Value="3"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="UseSystemFocusVisuals" Value="False"/>
+                    </Style>
+
+                    <!-- 运算符键 -->
+                    <Style x:Key="OpKey" TargetType="Button" BasedOn="{StaticResource KeyBtn}">
+                        <Setter Property="Background" Value="{ThemeResource CalcPrimaryContainerBrush}"/>
+                        <Setter Property="Foreground" Value="{ThemeResource CalcOnPrimaryContainerBrush}"/>
+                    </Style>
+
+                    <!-- 无底色键(C/复制等) -->
+                    <Style x:Key="GhostKey" TargetType="Button" BasedOn="{StaticResource KeyBtn}">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{ThemeResource CalcPrimaryBrush}"/>
+                    </Style>
+
+                    <!-- 等号键 -->
+                    <Style x:Key="EqKey" TargetType="Button" BasedOn="{StaticResource KeyBtn}">
+                        <Setter Property="Background" Value="{ThemeResource CalcPrimaryBrush}"/>
+                        <Setter Property="Foreground" Value="{ThemeResource CalcOnPrimaryBrush}"/>
+                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                    </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

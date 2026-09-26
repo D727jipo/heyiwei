@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -216,6 +217,25 @@ public class SciActivity extends Activity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+        findViewById(R.id.sciMenu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                android.widget.PopupMenu menu = new android.widget.PopupMenu(SciActivity.this, v);
+                menu.getMenu().add(0, 1, 0, R.string.menu_history);
+                menu.setOnMenuItemClickListener(
+                        new android.widget.PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(android.view.MenuItem item) {
+                        if (item.getItemId() == 1) {
+                            openHistoryDialog();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                menu.show();
             }
         });
     }
@@ -444,14 +464,14 @@ public class SciActivity extends Activity {
                     public void run() {
                         computing = false;
                         if (myGen != generation) return;
-                        showProgressOrResult(v, err);
+                        showProgressOrResult(v, err, text);
                     }
                 });
             }
         });
     }
 
-    private void showProgressOrResult(BigDec v, String err) {
+    private void showProgressOrResult(BigDec v, String err, String expr) {
         if (err != null) {
             hideProgress();
             result.setText("");
@@ -468,6 +488,7 @@ public class SciActivity extends Activity {
             hideProgress();
             return;
         }
+        CalcHistory.add(this, expr, v.toString());
         lastValue = v;
         String s = v.toString();
         fullResult = s;
@@ -608,6 +629,51 @@ public class SciActivity extends Activity {
         });
     }
 
+
+    /** 显示用: 每行 100 位强制换行(纯数字串没有断行点, TextView 无法自动折行) */
+    private static String formatDigitsPage(String s) {
+        StringBuilder sb = new StringBuilder(s.length() + s.length() / 100 + 2);
+        for (int i = 0; i < s.length(); i += 100) {
+            if (i > 0) sb.append('\n');
+            sb.append(s, i, Math.min(s.length(), i + 100));
+        }
+        return sb.toString();
+    }
+
+    // ======================= 历史记录 =======================
+
+    private void openHistoryDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_history);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+        LinearLayout list = (LinearLayout) dialog.findViewById(R.id.hList);
+        MainActivity.fillHistoryList(this, list, input, dialog);
+        dialog.findViewById(R.id.hClose).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.findViewById(R.id.hClear).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CalcHistory.clear(SciActivity.this);
+                list.removeAllViews();
+                TextView empty = new TextView(SciActivity.this);
+                empty.setText("暂无历史记录");
+                empty.setTextColor(getResources().getColor(R.color.md_on_surface_variant));
+                empty.setTextSize(13);
+                empty.setPadding(8, 16, 8, 16);
+                list.addView(empty);
+                Toast.makeText(SciActivity.this, "历史记录已清空", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
+    }
+
     /** 分页浏览完整数字(与普通模式一致) */
     private void showFullResult() {
         if (fullResult == null || fullResult.length() == 0) {
@@ -636,7 +702,7 @@ public class SciActivity extends Activity {
             public void run() {
                 int from = page[0] * PAGE_CHARS;
                 int to = Math.min(fullResult.length(), from + PAGE_CHARS);
-                text.setText(fullResult.substring(from, to));
+                text.setText(formatDigitsPage(fullResult.substring(from, to)));
                 info.setText("共 " + fullResult.length() + " 个字符 · 第 " + (page[0] + 1)
                         + " / " + pages + " 页 (每页 " + PAGE_CHARS + " 字符)");
                 first.setEnabled(page[0] > 0);
