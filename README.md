@@ -252,4 +252,5 @@ python tests\run_tests.py
 本项目采用 **MIT License** —— 可以自由使用、修改、分发（包括商业用途），只需保留版权声明与许可声明。详见 [LICENSE](LICENSE)。
 
 ## 其实我也不知道桌面端有什么用，这个项目主要是给安卓用的。
-## 这个项目完全由DeepSeek编写（其实是因为作者是初中生，只会python...）没有人工参与！
+## 这个项目完全由AI编写（其实是因为作者是初中生，只会python...）没有人工参与！
+** 这个项目参与有：DeepSeek v4.1-flash、Kimi-K2.7-code、GLM-5.3-flash
